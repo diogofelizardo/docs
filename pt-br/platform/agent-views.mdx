@@ -1,0 +1,129 @@
+---
+title: "Agent Views"
+description: "Defina consultas SQL que controlam quais dados os agentes de IA podem acessar"
+---
+
+## Visão Geral
+
+Uma **Agent View** é uma consulta SQL nomeada que define um conjunto de dados dentro de um projeto. As views servem como base de dados para MCP Tools — toda tool deve estar vinculada a uma view.
+
+Agent Views permitem que você:
+- Pré-defina consultas SQL seguras e testadas
+- Controle exatamente quais tabelas e colunas são expostas
+- Reutilize a mesma definição de dados em múltiplas tools
+
+## Criando uma view
+
+<Steps>
+  <Step title="Selecione uma datasource">
+    No editor do seu projeto, selecione a datasource que deseja consultar na barra lateral esquerda.
+  </Step>
+  <Step title="Crie uma nova view">
+    Clique em **New View** ou no botão **+** na seção de views.
+  </Step>
+  <Step title="Nomeie sua view">
+    Dê um nome descritivo que reflita os dados retornados:
+    - `active_customers`
+    - `recent_orders`
+    - `monthly_revenue`
+  </Step>
+  <Step title="Escreva sua consulta SQL">
+    Use o editor SQL integrado para escrever sua consulta. O editor oferece:
+    - Destaque de sintaxe
+    - Autocompletar de tabelas e colunas
+    - Detecção de erros
+
+    ```sql
+    SELECT
+      c.id,
+      c.name,
+      c.email,
+      c.plan,
+      c.created_at,
+      COUNT(o.id) as order_count
+    FROM customers c
+    LEFT JOIN orders o ON o.customer_id = c.id
+    WHERE c.status = 'active'
+    GROUP BY c.id, c.name, c.email, c.plan, c.created_at
+    ```
+  </Step>
+  <Step title="Salve a view">
+    Clique em **Save** para armazenar sua view. Agora ela está pronta para ser usada por MCP Tools.
+  </Step>
+</Steps>
+
+## Boas práticas
+
+<AccordionGroup>
+  <Accordion title="Use SELECT com colunas explícitas">
+    Evite `SELECT *`. Liste colunas específicas para controlar exatamente quais dados são expostos e melhorar o desempenho da consulta.
+
+    ```sql
+    -- Bom
+    SELECT id, name, email FROM customers
+
+    -- Evite
+    SELECT * FROM customers
+    ```
+  </Accordion>
+
+  <Accordion title="Filtre os dados adequadamente">
+    Adicione cláusulas WHERE para limitar o escopo dos dados retornados. Exponha apenas o que os agentes precisam.
+
+    ```sql
+    SELECT id, name, status
+    FROM customers
+    WHERE status = 'active'
+      AND deleted_at IS NULL
+    ```
+  </Accordion>
+
+  <Accordion title="Use JOINs para dados mais ricos">
+    Combine dados de múltiplas tabelas para dar aos agentes mais contexto em uma única consulta.
+
+    ```sql
+    SELECT
+      o.id as order_id,
+      o.total,
+      c.name as customer_name,
+      p.name as product_name
+    FROM orders o
+    JOIN customers c ON c.id = o.customer_id
+    JOIN products p ON p.id = o.product_id
+    ```
+  </Accordion>
+
+  <Accordion title="Exclua colunas sensíveis">
+    Nunca inclua senhas brutas, chaves de API ou outros segredos nas views. Use [mascaramento de dados](/pt-br/security/data-masking) para campos PII.
+
+    ```sql
+    -- Bom: exclui dados sensíveis
+    SELECT id, name, email, plan FROM customers
+
+    -- Ruim: expõe dados sensíveis
+    SELECT id, name, email, password_hash, api_key FROM customers
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Vinculando views a tools
+
+Toda MCP Tool requer uma Agent View vinculada. A view fornece:
+
+1. **Contexto** — a tool "sabe" quais dados estão disponíveis
+2. **Governança** — views atuam como uma camada de governança para acesso a dados
+3. **Reusabilidade** — uma view pode servir múltiplas tools
+
+Por exemplo, uma view `active_customers` poderia ser usada por:
+- `get_customer_by_id` — busca por ID
+- `search_customers` — pesquisa por nome ou email
+- `list_recent_customers` — lista os clientes criados mais recentemente
+
+## Editando e excluindo views
+
+- **Editar**: Selecione a view e modifique sua consulta SQL ou nome. Salve para aplicar as alterações.
+- **Excluir**: Remover uma view também remove todas as MCP Tools vinculadas a ela.
+
+<Warning>
+  Editar a consulta SQL de uma view afeta todas as tools vinculadas a ela. Teste suas alterações antes de salvar em produção.
+</Warning>

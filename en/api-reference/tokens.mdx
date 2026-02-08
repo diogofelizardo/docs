@@ -1,0 +1,154 @@
+---
+title: "Tokens API"
+description: "Generate and manage MCP access tokens"
+---
+
+## List tokens
+
+Returns all tokens for a project.
+
+```
+GET /api/projects/{projectId}/tokens
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+### Response
+
+```json
+{
+  "tokens": [
+    {
+      "id": "tok_abc123",
+      "name": "claude-production",
+      "tokenPrefix": "sk_live_",
+      "projectId": "clx1234567890",
+      "isActive": true,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "lastUsedAt": "2024-01-20T14:00:00Z",
+      "expiresAt": null
+    }
+  ]
+}
+```
+
+<ResponseField name="tokens" type="object[]" required>
+  Array of token objects.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Unique token identifier</ResponseField>
+    <ResponseField name="name" type="string" required>Human-readable token name</ResponseField>
+    <ResponseField name="tokenPrefix" type="string" required>First 8 characters for identification</ResponseField>
+    <ResponseField name="isActive" type="boolean" required>Whether the token is currently active</ResponseField>
+    <ResponseField name="createdAt" type="string" required>ISO 8601 creation timestamp</ResponseField>
+    <ResponseField name="lastUsedAt" type="string">ISO 8601 timestamp of last use</ResponseField>
+    <ResponseField name="expiresAt" type="string">ISO 8601 expiration date (null = no expiration)</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Note>
+  The full token value is never returned after creation. Only the `tokenPrefix` is available for identification.
+</Note>
+
+---
+
+## Generate token
+
+Creates a new MCP access token.
+
+```
+POST /api/projects/{projectId}/tokens
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Human-readable name for the token. Default: "Default Token".
+</ParamField>
+
+<ParamField body="expiresAt" type="string">
+  Optional ISO 8601 expiration date.
+</ParamField>
+
+### Example
+
+```bash
+curl -X POST https://surfdata.com.br/api/projects/clx123/tokens \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "cursor-development",
+    "expiresAt": "2025-06-01T00:00:00Z"
+  }'
+```
+
+### Response
+
+```json
+{
+  "token": {
+    "id": "tok_xyz789",
+    "name": "cursor-development",
+    "tokenPrefix": "sk_live_",
+    "plainToken": "sk_live_<your-token>",
+    "projectId": "clx1234567890",
+    "isActive": true,
+    "createdAt": "2024-01-15T10:30:00Z",
+    "expiresAt": "2025-06-01T00:00:00Z"
+  }
+}
+```
+
+<Warning>
+  The `plainToken` field is **only included in the creation response**. Store it immediately — it cannot be retrieved again.
+</Warning>
+
+---
+
+## Update token
+
+Updates a token's name or active status.
+
+```
+PATCH /api/projects/{projectId}/tokens/{tokenId}
+```
+
+<ParamField path="tokenId" type="string" required>
+  The token ID.
+</ParamField>
+
+<ParamField body="name" type="string">
+  New human-readable name.
+</ParamField>
+
+<ParamField body="isActive" type="boolean">
+  Set to `false` to deactivate or `true` to reactivate.
+</ParamField>
+
+### Example: Deactivate a token
+
+```bash
+curl -X PATCH https://surfdata.com.br/api/projects/clx123/tokens/tok_xyz789 \
+  -H "Content-Type: application/json" \
+  -d '{"isActive": false}'
+```
+
+---
+
+## Revoke token
+
+Permanently deletes a token.
+
+```
+DELETE /api/projects/{projectId}/tokens/{tokenId}
+```
+
+<ParamField path="tokenId" type="string" required>
+  The token ID.
+</ParamField>
+
+<Warning>
+  This action cannot be undone. Any agents using this token will immediately lose access.
+</Warning>

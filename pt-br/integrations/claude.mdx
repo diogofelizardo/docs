@@ -1,0 +1,146 @@
+---
+title: "Integração com Claude"
+description: "Conecte o Surf Data ao Claude Desktop e ao Claude Code"
+---
+
+## Visão geral
+
+O Surf Data integra nativamente com o Claude através do **Model Context Protocol (MCP)**. Uma vez configurado, o Claude pode descobrir e chamar suas ferramentas publicadas para consultar seus bancos de dados diretamente na conversa.
+
+## Claude Desktop
+
+### Configuração
+
+<Steps>
+  <Step title="Publique seu projeto">
+    Certifique-se de que seu projeto Surf Data está [publicado](/pt-br/platform/publishing) e que você possui um Bearer token.
+  </Step>
+  <Step title="Abra as configurações do Claude Desktop">
+    No Claude Desktop, navegue até **Settings** → **Developer** → **Edit Config**.
+
+    Isso abrirá o arquivo `claude_desktop_config.json`.
+  </Step>
+  <Step title="Adicione o servidor MCP">
+    Adicione o Surf Data como um servidor MCP:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer sk_live_your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+  <Step title="Reinicie o Claude Desktop">
+    Feche e reabra o Claude Desktop. Você deverá ver as ferramentas do Surf Data disponíveis no menu de ferramentas.
+  </Step>
+</Steps>
+
+### Uso
+
+Uma vez configurado, você pode pedir ao Claude para usar suas ferramentas de forma natural:
+
+> "Busque o cliente com ID 12345"
+
+> "Quais são os 10 principais pedidos deste mês?"
+
+> "Encontre todas as assinaturas ativas do plano Growth"
+
+O Claude selecionará automaticamente a ferramenta apropriada, passará os parâmetros corretos e apresentará os resultados em um formato legível.
+
+### Múltiplos projetos
+
+Para conectar múltiplos projetos Surf Data, adicione entradas separadas:
+
+```json
+{
+  "mcpServers": {
+    "surf-data-customers": {
+      "url": "https://surfdata.com.br/mcp/http",
+      "headers": {
+        "Authorization": "Bearer sk_live_customer-token"
+      }
+    },
+    "surf-data-analytics": {
+      "url": "https://surfdata.com.br/mcp/http",
+      "headers": {
+        "Authorization": "Bearer sk_live_analytics-token"
+      }
+    }
+  }
+}
+```
+
+## Claude Code
+
+### Configuração
+
+<Steps>
+  <Step title="Crie o arquivo de configuração MCP">
+    Na raiz do seu projeto, crie um arquivo `.mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer sk_live_your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+  <Step title="Inicie o Claude Code">
+    Abra o Claude Code no seu terminal. Ele detectará automaticamente a configuração MCP e se conectará ao Surf Data.
+  </Step>
+</Steps>
+
+### Uso no Claude Code
+
+O Claude Code pode usar suas ferramentas do Surf Data enquanto trabalha no código:
+
+```
+> Use a ferramenta get_customer_by_id para buscar o cliente 456 e me
+  ajude a construir um componente de dashboard para os dados dele
+```
+
+```
+> Consulte a ferramenta recent_orders e gere uma interface TypeScript
+  correspondente à estrutura da resposta
+```
+
+## Solução de problemas
+
+<AccordionGroup>
+  <Accordion title="Ferramentas não aparecem">
+    - Verifique se seu projeto está publicado
+    - Confirme que o Bearer token é válido e não expirou
+    - Reinicie o Claude Desktop após alterar a configuração
+    - Verifique se a URL do servidor MCP está correta
+  </Accordion>
+
+  <Accordion title="Erros de autenticação">
+    - Verifique se o token começa com `sk_live_`
+    - Confirme que o token não foi revogado ou desativado
+    - Certifique-se de que o formato do header `Authorization` é `Bearer <token>` (com um espaço)
+  </Accordion>
+
+  <Accordion title="Falhas na execução de ferramentas">
+    - Verifique o [painel de Evals](/pt-br/monitoring/evals) para detalhes do erro
+    - Confirme que a conexão com seu datasource ainda está válida
+    - Verifique se você atingiu seu limite de execuções
+  </Accordion>
+
+  <Accordion title="Respostas lentas">
+    - Consultas complexas podem demorar mais; verifique os tempos de execução no painel de Evals
+    - Confirme que seu servidor de banco de dados está saudável e responsivo
+    - Considere otimizar suas consultas SQL ou adicionar índices ao banco de dados
+  </Accordion>
+</AccordionGroup>

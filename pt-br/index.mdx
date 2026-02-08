@@ -1,0 +1,108 @@
+---
+title: "Introdução"
+description: "A forma mais simples e segura de conectar agentes de IA ao seu stack de dados"
+---
+
+## O que é o Surf Data?
+
+Surf Data é uma plataforma gerenciada que permite expor bancos de dados para agentes de IA via **Model Context Protocol (MCP)** em minutos, não em sprints.
+
+Em vez de construir e manter servidores MCP customizados, o Surf Data oferece uma infraestrutura completa para conectar bancos de dados **PostgreSQL** e **MySQL** a qualquer agente de IA — com segurança integrada, conformidade com LGPD e mascaramento de PII.
+
+<Card
+  title="Comece em 5 minutos"
+  icon="rocket"
+  href="/pt-br/quickstart"
+  horizontal
+>
+  Siga nosso guia de início rápido para conectar seu primeiro banco de dados e publicar um endpoint MCP.
+</Card>
+
+## Como funciona
+
+<Steps>
+  <Step title="Conecte seu banco de dados">
+    Adicione sua conexão PostgreSQL ou MySQL. O Surf Data criptografa e armazena suas credenciais com segurança.
+  </Step>
+  <Step title="Crie ferramentas SQL">
+    Escreva consultas SQL como ferramentas reutilizáveis com entradas parametrizadas. Defina quais dados os agentes podem acessar.
+  </Step>
+  <Step title="Configure políticas de segurança">
+    Ative o mascaramento de PII e defina políticas de acesso a dados para garantir conformidade com a LGPD.
+  </Step>
+  <Step title="Publique e integre">
+    Publique seu projeto e obtenha uma URL de endpoint MCP com um Bearer token. Conecte ao Claude, Cursor ou qualquer agente compatível com MCP.
+  </Step>
+</Steps>
+
+## Explore a plataforma
+
+<CardGroup cols={2}>
+  <Card
+    title="Conceitos principais"
+    icon="lightbulb"
+    href="/pt-br/concepts"
+  >
+    Entenda projetos, datasources, views, ferramentas e o protocolo MCP.
+  </Card>
+  <Card
+    title="Guia da plataforma"
+    icon="database"
+    href="/pt-br/platform/projects"
+  >
+    Aprenda a gerenciar projetos, datasources e ferramentas MCP.
+  </Card>
+  <Card
+    title="Segurança"
+    icon="shield-halved"
+    href="/pt-br/security/authentication"
+  >
+    Autenticação, mascaramento de dados, conformidade com LGPD e gerenciamento de tokens.
+  </Card>
+  <Card
+    title="Referência da API"
+    icon="code"
+    href="/pt-br/api-reference/introduction"
+  >
+    Documentação completa da REST API para acesso programático.
+  </Card>
+</CardGroup>
+
+## Integrações
+
+Conecte o Surf Data às suas ferramentas de IA favoritas.
+
+<CardGroup cols={3}>
+  <Card
+    title="Claude"
+    icon="message-bot"
+    href="/pt-br/integrations/claude"
+  >
+    Use com Claude Desktop ou Claude Code.
+  </Card>
+  <Card
+    title="Cursor"
+    icon="terminal"
+    href="/pt-br/integrations/cursor"
+  >
+    Conecte ao Cursor IDE como um servidor MCP.
+  </Card>
+  <Card
+    title="Agentes customizados"
+    icon="robot"
+    href="/pt-br/integrations/custom-agents"
+  >
+    Integre com qualquer agente compatível com MCP.
+  </Card>
+</CardGroup>
+
+## Por que o Surf Data?
+
+| Surf Data | Construir seu próprio MCP |
+|-----------|--------------------------|
+| Pronto em minutos | Semanas de desenvolvimento |
+| Conformidade com LGPD integrada | Precisa implementar por conta própria |
+| Mascaramento de PII incluso | Camada de segurança customizada necessária |
+| Infraestrutura gerenciada | Auto-hospedado e mantido por você |
+| Monitoramento de uso e alertas | Construa sua própria observabilidade |
+| Preços em BRL | Alternativas apenas em USD |

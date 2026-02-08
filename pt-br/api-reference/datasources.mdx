@@ -1,0 +1,259 @@
+---
+title: "API de Datasources"
+description: "Gerencie conexões de banco de dados dentro de projetos"
+---
+
+## Listar datasources
+
+Retorna todas as datasources de um projeto.
+
+```
+GET /api/projects/{projectId}/datasources
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "datasources": [
+    {
+      "id": "ds_abc123",
+      "name": "Production DB",
+      "type": "postgres",
+      "projectId": "clx1234567890",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-15T10:30:00Z",
+      "_count": {
+        "agentViews": 3,
+        "mcpTools": 5
+      }
+    }
+  ]
+}
+```
+
+<ResponseField name="datasources" type="object[]" required>
+  Array de objetos de datasource.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Identificador único da datasource</ResponseField>
+    <ResponseField name="name" type="string" required>Nome de exibição da datasource</ResponseField>
+    <ResponseField name="type" type="string" required>Tipo de banco de dados: `postgres`, `mysql` ou `demo`</ResponseField>
+    <ResponseField name="projectId" type="string" required>ID do projeto pai</ResponseField>
+    <ResponseField name="createdAt" type="string" required>Timestamp de criação em ISO 8601</ResponseField>
+    <ResponseField name="_count" type="object">
+      Contagem de recursos.
+      <Expandable>
+        <ResponseField name="agentViews" type="number">Número de views vinculadas</ResponseField>
+        <ResponseField name="mcpTools" type="number">Número de tools vinculadas</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Criar datasource
+
+Cria uma nova conexão de banco de dados.
+
+```
+POST /api/projects/{projectId}/datasources
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Nome de exibição para a datasource.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Tipo de banco de dados. Um de: `postgres`, `mysql`, `demo`.
+</ParamField>
+
+<ParamField body="config" type="object">
+  Configuração de conexão. Obrigatório para tipos `postgres` e `mysql`.
+  <Expandable>
+    <ParamField body="connectionString" type="string">URL de conexão completa. Se fornecida, os outros campos são opcionais.</ParamField>
+    <ParamField body="host" type="string">Hostname do servidor de banco de dados.</ParamField>
+    <ParamField body="port" type="number">Porta do servidor de banco de dados. Padrão: 5432 (PG) ou 3306 (MySQL).</ParamField>
+    <ParamField body="database" type="string">Nome do banco de dados.</ParamField>
+    <ParamField body="username" type="string">Usuário do banco de dados.</ParamField>
+    <ParamField body="password" type="string">Senha do banco de dados.</ParamField>
+    <ParamField body="ssl" type="boolean">Habilitar SSL (apenas PostgreSQL).</ParamField>
+    <ParamField body="sslMode" type="string">Modo SSL (ex.: `require`, `verify-full`).</ParamField>
+  </Expandable>
+</ParamField>
+
+### Exemplo
+
+```bash
+curl -X POST https://surfdata.com.br/api/projects/clx123/datasources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production PostgreSQL",
+    "type": "postgres",
+    "config": {
+      "host": "db.example.com",
+      "port": 5432,
+      "database": "myapp",
+      "username": "readonly_user",
+      "password": "secure_password",
+      "ssl": true
+    }
+  }'
+```
+
+### Processo
+
+1. Valida os campos de configuração
+2. Testa a conexão com o banco de dados
+3. Criptografa a configuração
+4. Verifica os limites de datasources da organização
+5. Cria e retorna a datasource
+
+### Erros
+
+| Status | Erro | Causa |
+|--------|------|-------|
+| `400` | Campos obrigatórios ausentes | Nome ou tipo não fornecido |
+| `400` | Teste de conexão falhou | Não foi possível conectar ao banco de dados |
+| `409` | Limite de datasources atingido | A organização atingiu o limite de datasources do seu plano |
+
+---
+
+## Testar conexão
+
+Testa uma conexão de banco de dados sem criar uma datasource.
+
+```
+POST /api/projects/{projectId}/datasources/test-connection
+```
+
+<ParamField body="type" type="string" required>
+  Tipo de banco de dados: `postgres` ou `mysql`.
+</ParamField>
+
+<ParamField body="config" type="object" required>
+  Configuração de conexão (mesma do criar).
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "success": true,
+  "message": "Connected successfully",
+  "tableCount": 42
+}
+```
+
+---
+
+## Obter tabelas da datasource
+
+Retorna a lista de tabelas e colunas de uma datasource.
+
+```
+GET /api/projects/{projectId}/datasources/{datasourceId}/tables
+```
+
+<ParamField path="datasourceId" type="string" required>
+  O ID da datasource.
+</ParamField>
+
+<ParamField query="table" type="string">
+  Filtrar por uma tabela específica para obter suas colunas.
+</ParamField>
+
+<ParamField query="schema" type="string">
+  Filtrar por um schema específico.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "tables": [
+    {
+      "name": "customers",
+      "schema": "public",
+      "type": "table"
+    }
+  ],
+  "columns": [
+    {
+      "name": "id",
+      "type": "varchar",
+      "nullable": false
+    },
+    {
+      "name": "email",
+      "type": "varchar",
+      "nullable": false
+    }
+  ]
+}
+```
+
+---
+
+## Executar query
+
+Executa uma query SQL bruta em uma datasource.
+
+```
+POST /api/projects/{projectId}/datasources/{datasourceId}/query
+```
+
+<ParamField body="query" type="string" required>
+  A query SQL a ser executada.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "result": {
+    "columns": ["id", "name", "email"],
+    "rows": [
+      {"id": "1", "name": "João Silva", "email": "joao@example.com"}
+    ],
+    "rowCount": 1,
+    "executionTime": 45
+  }
+}
+```
+
+<Note>
+  Este endpoint é para testes e exploração no dashboard. Para acesso de agentes, use o [endpoint MCP](/pt-br/api-reference/mcp-endpoint).
+</Note>
+
+---
+
+## Atualizar datasource
+
+Atualiza o nome ou a configuração de uma datasource.
+
+```
+PUT /api/projects/{projectId}/datasources/{datasourceId}
+```
+
+---
+
+## Excluir datasource
+
+Exclui permanentemente uma datasource e todas as views e tools vinculadas.
+
+```
+DELETE /api/projects/{projectId}/datasources/{datasourceId}
+```
+
+<Warning>
+  Excluir uma datasource também exclui todas as Agent Views e MCP Tools vinculadas a ela.
+</Warning>

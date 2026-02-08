@@ -1,0 +1,84 @@
+---
+title: "Painel de Consumo"
+description: "Acompanhe execuções de tools, métricas de uso e consumo de recursos"
+---
+
+## Visão geral
+
+O **Painel de Consumo** oferece visibilidade em tempo real sobre como as execuções de tools da sua organização estão sendo utilizadas. Monitore padrões de uso, acompanhe limites e identifique oportunidades de otimização.
+
+## Acessando o painel
+
+Navegue até **Consumption** na barra lateral para visualizar suas métricas de uso.
+
+## Visão geral das métricas
+
+O painel exibe diversas métricas principais:
+
+### Contagem de execuções
+
+O número total de execuções de tools no período de faturamento atual.
+
+- **Uso atual** — quantas execuções foram realizadas
+- **Limite do plano** — sua cota mensal de execuções
+- **Percentual de uso** — barra de progresso visual mostrando o consumo
+
+### Detalhamento de execuções
+
+Um gráfico mostrando execuções ao longo do tempo com detalhamento por:
+
+- **Status** — Success, Error, Timeout
+- **Tool** — quais tools são chamados com mais frequência
+- **Período** — visualizações por hora, dia ou semana
+
+### Métricas de desempenho
+
+| Métrica | Descrição |
+|---------|-----------|
+| **Duração média** | Tempo médio de execução em milissegundos |
+| **Duração mínima** | Execução mais rápida |
+| **Duração máxima** | Execução mais lenta |
+| **Total de linhas retornadas** | Número total de linhas de dados servidas |
+| **Taxa de sucesso** | Percentual de execuções bem-sucedidas |
+
+## Barra de progresso de uso
+
+A barra de progresso mostra seu consumo atual em relação ao limite do seu plano:
+
+| Nível de uso | Cor | Ação |
+|--------------|-----|------|
+| 0-79% | Verde | Uso normal |
+| 80-89% | Amarelo | Aviso — considere fazer upgrade |
+| 90-99% | Laranja | Crítico — próximo do limite |
+| 100% | Vermelho | Limite atingido — execuções bloqueadas |
+
+## Cartão de upgrade
+
+Quando você está se aproximando do seu limite, um **Cartão de Upgrade** aparece sugerindo o próximo nível de plano. Ele mostra:
+
+- Seu plano atual e uso
+- O plano recomendado com seus limites mais altos
+- Um botão direto de upgrade
+
+## Filtros e intervalos de tempo
+
+Você pode filtrar o painel por:
+
+- **Período** — ciclo de faturamento atual, últimos 7 dias, últimos 30 dias
+- **Projeto** — visualizar o consumo de um projeto específico
+- **Tool** — detalhar o uso de um tool específico
+
+## Estatísticas por hora
+
+O Surf Data agrega dados de execução em intervalos de uma hora para consultas eficientes. Cada intervalo rastreia:
+
+- Contagens de total, sucesso, erro e timeout
+- Duração média, mínima e máxima
+- Total de linhas retornadas
+- Detalhamento de erros por código de erro
+
+Isso permite renderização rápida de gráficos e métricas mesmo com altos volumes de execução.
+
+## Exportando dados
+
+Você pode exportar dados de consumo pela [API REST](/pt-br/api-reference/introduction) para uso em ferramentas de analytics externas ou painéis personalizados.

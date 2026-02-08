@@ -1,0 +1,151 @@
+---
+title: "Faturamento e Planos"
+description: "Planos de preços, gerenciamento de faturamento e detalhes da assinatura"
+---
+
+## Visão geral
+
+O Surf Data oferece quatro planos de preços projetados para diferentes tamanhos de equipe e casos de uso. Todos os planos são cobrados mensalmente em **BRL (Real Brasileiro)** e incluem um **teste gratuito de 14 dias**.
+
+## Comparação de planos
+
+| Recurso | Starter | Team | Growth | Enterprise |
+|---------|---------|------|--------|------------|
+| **Preço** | R$99/mês | R$199/mês | R$499/mês | Personalizado |
+| **Execuções/mês** | 5.000 | 10.000 | 25.000 | Ilimitado |
+| **Membros da equipe** | 3 | 5 | Ilimitado | Ilimitado |
+| **Fontes de dados** | 1 | 3 | 5 | Ilimitado |
+| **Views e ferramentas** | Ilimitado | Ilimitado | Ilimitado | Ilimitado |
+| **Criação de ferramentas com IA** | Sim | Sim | Sim | Sim |
+| **Joins entre bancos de dados** | Sim | Sim | Sim | Sim |
+| **Organização de projetos** | — | Sim | Sim | Sim |
+| **RBAC** | — | Sim | Sim | Sim |
+| **Suporte por e-mail** | — | Sim | Sim | Sim |
+| **Dashboard de avaliações** | — | — | Sim | Sim |
+| **Logs de auditoria** | — | — | Sim | Sim |
+| **SSO/SAML** | — | — | Sim | Sim |
+| **Suporte prioritário** | — | — | Sim | Sim |
+| **Nuvem privada/On-prem** | — | — | — | Sim |
+| **SLAs personalizados** | — | — | — | Sim |
+| **Conformidade avançada** | — | — | — | Sim |
+| **Suporte dedicado** | — | — | — | Sim |
+
+## Detalhes dos planos
+
+<Tabs>
+  <Tab title="Starter">
+    **R$99/mês** — Ideal para desenvolvedores individuais e projetos pequenos.
+
+    - 5.000 execuções de ferramentas por mês
+    - Até 3 membros na equipe
+    - 1 conexão de fonte de dados
+    - Views e ferramentas ilimitadas
+    - Criação de ferramentas assistida por IA
+    - Joins entre bancos de dados
+  </Tab>
+  <Tab title="Team">
+    **R$199/mês** — Ideal para equipes pequenas com múltiplas fontes de dados.
+
+    Tudo do Starter, mais:
+    - 10.000 execuções de ferramentas por mês
+    - Até 5 membros na equipe
+    - Até 3 conexões de fontes de dados
+    - Organização de projetos
+    - Controle de acesso baseado em funções (RBAC)
+    - Suporte por e-mail
+  </Tab>
+  <Tab title="Growth">
+    **R$499/mês** — Ideal para equipes em crescimento com necessidades avançadas.
+
+    Tudo do Team, mais:
+    - 25.000 execuções de ferramentas por mês
+    - Membros ilimitados na equipe
+    - Até 5 conexões de fontes de dados
+    - Dashboard de avaliações
+    - Logs de auditoria completos
+    - Autenticação SSO/SAML
+    - Suporte prioritário
+  </Tab>
+  <Tab title="Enterprise">
+    **Preço personalizado** — Para grandes organizações com requisitos de conformidade.
+
+    Tudo do Growth, mais:
+    - Execuções ilimitadas
+    - Fontes de dados ilimitadas
+    - Implantação em nuvem privada ou on-premise
+    - SLAs personalizados
+    - Recursos avançados de conformidade
+    - Gerente de conta dedicado
+    - Integrações personalizadas
+
+    [Fale com o comercial](mailto:sales@surfdata.com.br) para obter preços.
+  </Tab>
+</Tabs>
+
+## Gerenciando sua assinatura
+
+### Upgrade
+
+1. Acesse **Configurações** → **Faturamento**
+2. Clique em **Fazer Upgrade do Plano**
+3. Selecione seu novo plano
+4. Confirme a alteração
+
+O upgrade entra em vigor imediatamente. Você será cobrado um valor proporcional pelo restante do período de faturamento atual.
+
+### Downgrade
+
+1. Acesse **Configurações** → **Faturamento**
+2. Clique em **Alterar Plano**
+3. Selecione o plano inferior
+4. Confirme a alteração
+
+<Warning>
+  O downgrade pode fazer com que você exceda os limites do novo plano. Revise seu uso atual antes de fazer o downgrade:
+  - **Fontes de dados**: Fontes de dados excedentes não serão excluídas, mas não poderão ser editadas até que você esteja dentro do limite
+  - **Membros**: Membros excedentes não serão removidos, mas você não poderá convidar novos
+  - **Execuções**: Se você excedeu o limite mensal do novo plano, as execuções de ferramentas serão bloqueadas até o próximo ciclo de faturamento
+</Warning>
+
+### Cancelamento
+
+Para cancelar sua assinatura:
+1. Acesse **Configurações** → **Faturamento**
+2. Clique em **Cancelar Assinatura**
+3. Confirme o cancelamento
+
+Sua conta permanece ativa até o final do período de faturamento atual. Após isso, seus projetos ficam somente leitura e os endpoints MCP param de aceitar requisições.
+
+## Métodos de pagamento
+
+O Surf Data utiliza o **Stripe** para processamento de pagamentos. Aceitamos:
+- Cartões de crédito (Visa, Mastercard, Amex)
+- Cartões de débito
+- Boleto bancário (para planos anuais)
+
+### Faturas
+
+Acesse suas faturas em **Configurações** → **Faturamento**. As faturas são geradas mensalmente e incluem:
+- Cobranças do plano
+- Detalhes de uso
+- Método de pagamento utilizado
+- Informações fiscais
+
+## Teste gratuito
+
+Todos os planos incluem um **teste gratuito de 14 dias**. Durante o teste:
+- Acesso total a todos os recursos do plano selecionado
+- Cartão de crédito é necessário no cadastro
+- Cancele a qualquer momento durante o teste sem cobrança
+- A cobrança automática começa após 14 dias, caso não seja cancelado
+
+## Limites baseados em uso
+
+Os limites de execução são redefinidos no início de cada ciclo de faturamento. Acompanhe seu uso no [Dashboard de Consumo](/pt-br/monitoring/consumption).
+
+Quando você se aproximar do seu limite:
+- **Limite de 80%** — notificação de aviso
+- **Limite de 90%** — notificação crítica
+- **Limite de 100%** — execuções de ferramentas são bloqueadas
+
+Consulte [Alertas](/pt-br/monitoring/alerts) para configuração de notificações.

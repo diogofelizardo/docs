@@ -1,0 +1,100 @@
+---
+title: "Avaliações"
+description: "Monitore o desempenho dos tools e revise o histórico de execuções"
+---
+
+## Visão geral
+
+O painel de **Avaliações (Evals)** fornece informações detalhadas sobre as execuções dos seus tools. Revise invocações individuais, acompanhe taxas de sucesso e identifique problemas.
+
+<Note>
+  O painel de Evals está disponível nos planos **Growth** e **Enterprise**.
+</Note>
+
+## Acessando as avaliações
+
+Navegue até **Evals** na barra lateral para visualizar o painel de avaliações.
+
+## Logs de invocação
+
+Cada execução de tool é registrada como um **log de invocação** com os seguintes detalhes:
+
+| Campo | Descrição |
+|-------|-----------|
+| **Nome do tool** | Qual MCP Tool foi chamado |
+| **Token** | Qual token autenticou a requisição (nome + prefixo) |
+| **Status** | `SUCCESS`, `ERROR` ou `TIMEOUT` |
+| **Template da query** | A query SQL com placeholders de parâmetros |
+| **Query executada** | A query SQL real que foi executada |
+| **Parâmetros** | Os argumentos passados pelo agente |
+| **Duração** | Tempo de execução em milissegundos |
+| **Contagem de linhas** | Número de linhas retornadas |
+| **Timestamp** | Quando a execução iniciou e finalizou |
+| **Detalhes do erro** | Código e mensagem de erro (se falhou) |
+
+## Filtrando logs
+
+Filtre os logs de invocação por:
+
+- **Status** — Success, Error, Timeout
+- **Tool** — MCP Tool específico
+- **Token** — token de acesso específico
+- **Intervalo de datas** — janela de tempo personalizada
+- **Projeto** — projeto específico
+
+## Identificando problemas
+
+### Padrões comuns de erro
+
+<AccordionGroup>
+  <Accordion title="Erros de sintaxe SQL">
+    **Sintoma**: Status é `ERROR` com uma mensagem de erro do banco de dados.
+
+    **Solução**: Revise a query executada no log. Verifique:
+    - Erros de digitação em nomes de colunas ou tabelas
+    - Aspas ou colchetes ausentes
+    - Substituições de parâmetros inválidas
+  </Accordion>
+
+  <Accordion title="Timeouts de conexão">
+    **Sintoma**: Status é `TIMEOUT`.
+
+    **Solução**:
+    - Verifique a acessibilidade de rede do seu servidor de banco de dados
+    - Confirme se a query não é muito complexa ou retorna muitas linhas
+    - Certifique-se de que seu banco de dados não está sobrecarregado
+  </Accordion>
+
+  <Accordion title="Erros de permissão">
+    **Sintoma**: Status é `ERROR` com mensagem "permission denied".
+
+    **Solução**: Verifique se o usuário do banco de dados possui permissões SELECT nas tabelas e schemas necessários.
+  </Accordion>
+
+  <Accordion title="Limite atingido">
+    **Sintoma**: Status é `ERROR` com código de erro `LIMIT_REACHED`.
+
+    **Solução**: Sua organização excedeu o limite mensal de execuções. [Faça upgrade do seu plano](/pt-br/organizations/billing) ou aguarde o próximo ciclo de faturamento.
+  </Accordion>
+</AccordionGroup>
+
+## Análise de desempenho
+
+Use o painel de evals para otimizar seus tools:
+
+1. **Identifique queries lentas** — ordene por duração para encontrar as execuções mais lentas
+2. **Verifique contagens de linhas** — contagens altas de linhas podem indicar queries muito amplas
+3. **Revise taxas de erro** — tools com altas taxas de erro podem precisar de validação de parâmetros
+4. **Monitore tendências** — observe degradação de desempenho ao longo do tempo
+
+## Trilha de auditoria
+
+Os logs de invocação servem como uma trilha de auditoria completa para conformidade:
+
+- **Quem** acessou os dados (identificação do token)
+- **Quais** dados foram consultados (query executada + parâmetros)
+- **Quando** o acesso ocorreu (timestamps)
+- **Quanto** dado foi retornado (contagem de linhas)
+- **Resultado** do acesso (sucesso/erro)
+
+Esta trilha de auditoria suporta os requisitos de conformidade com a [LGPD](/pt-br/security/lgpd) para transparência no acesso a dados.

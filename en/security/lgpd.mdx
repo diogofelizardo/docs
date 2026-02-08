@@ -1,0 +1,112 @@
+---
+title: "LGPD Compliance"
+description: "How Surf Data helps you meet Brazilian data protection requirements"
+---
+
+## Overview
+
+The **Lei Geral de Proteção de Dados (LGPD)** is Brazil's comprehensive data protection law. When using AI agents with production data, LGPD compliance is critical. Surf Data is designed from the ground up to help you meet these requirements.
+
+## LGPD principles supported
+
+| LGPD Principle | How Surf Data helps |
+|----------------|-------------------|
+| **Purpose Limitation** | Tools expose only the data needed for specific use cases |
+| **Data Minimization** | Agent Views control exactly which columns are accessible |
+| **Security** | Encrypted connections, encrypted storage, token-based auth |
+| **Transparency** | Complete audit logs of every data access |
+| **Accountability** | Usage tracking and alert system |
+
+## Built-in compliance features
+
+### Data access control
+
+<CardGroup cols={2}>
+  <Card title="Agent Views" icon="eye">
+    Control exactly which tables, columns, and rows agents can access through curated SQL queries.
+  </Card>
+  <Card title="PII Masking" icon="mask">
+    Automatically mask sensitive data (emails, CPFs, phone numbers) before it reaches agents.
+  </Card>
+  <Card title="Read-only Access" icon="lock">
+    Destructive SQL operations (INSERT, UPDATE, DELETE, DROP) are blocked at the platform level.
+  </Card>
+  <Card title="Row Limits" icon="list-ol">
+    Automatic LIMIT 100 on all queries prevents bulk data extraction.
+  </Card>
+</CardGroup>
+
+### Audit and transparency
+
+<CardGroup cols={2}>
+  <Card title="Invocation Logs" icon="clock-rotate-left">
+    Every tool execution is logged with the query, parameters, user, timestamp, and result count.
+  </Card>
+  <Card title="Usage Tracking" icon="chart-bar">
+    Monitor data access patterns per organization, project, and tool.
+  </Card>
+  <Card title="Token Tracking" icon="key">
+    Know exactly which token (and therefore which agent) accessed your data.
+  </Card>
+  <Card title="Alert System" icon="bell">
+    Get notified when usage approaches or exceeds defined thresholds.
+  </Card>
+</CardGroup>
+
+## Compliance checklist
+
+Use this checklist to ensure your Surf Data setup meets LGPD requirements:
+
+<Steps>
+  <Step title="Identify personal data">
+    Audit your database tables and identify columns containing personal data (PII):
+    - Names, emails, phone numbers
+    - CPF, CNPJ, RG numbers
+    - Addresses, location data
+    - Financial information
+    - Health data
+  </Step>
+  <Step title="Apply data minimization">
+    Create Agent Views that expose **only** the columns agents need. Exclude all unnecessary personal data.
+  </Step>
+  <Step title="Enable PII masking">
+    For tools that must access personal data, enable [data masking policies](/en/security/data-masking) to protect sensitive fields.
+  </Step>
+  <Step title="Use read-only credentials">
+    Configure datasource connections with read-only database users to prevent data modification.
+  </Step>
+  <Step title="Set up monitoring">
+    Enable [usage alerts](/en/monitoring/alerts) to track data access and detect anomalies.
+  </Step>
+  <Step title="Review audit logs">
+    Regularly review [invocation logs](/en/monitoring/evals) to ensure data access patterns match expected usage.
+  </Step>
+  <Step title="Document your setup">
+    Maintain records of your data access policies, masking rules, and access controls for regulatory audits.
+  </Step>
+</Steps>
+
+## Data residency
+
+Surf Data processes and stores data in compliance with LGPD requirements:
+
+- User data and configuration are stored in managed databases
+- Database queries are executed in real-time and results are not cached or stored
+- Invocation logs record metadata (query text, parameters, row counts) but not query results
+- Token hashes are stored — plain tokens are never persisted
+
+<Note>
+  Enterprise plan customers can request dedicated infrastructure with specific data residency requirements. Contact our sales team for details.
+</Note>
+
+## Data subject rights
+
+LGPD grants individuals specific rights over their data. Surf Data supports these through:
+
+| Right | Implementation |
+|-------|---------------|
+| **Right to access** | Audit logs show what data was accessed and when |
+| **Right to correction** | Agents have read-only access; corrections must be done directly in the database |
+| **Right to deletion** | Delete user accounts, organizations, and all associated data via the dashboard |
+| **Right to portability** | Export your configuration (projects, views, tools) via the API |
+| **Right to revoke consent** | Revoke MCP tokens to immediately cut off agent access |

@@ -1,0 +1,112 @@
+---
+title: "Conformidade com a LGPD"
+description: "Como o Surf Data ajuda você a atender aos requisitos de proteção de dados brasileiros"
+---
+
+## Visão geral
+
+A **Lei Geral de Proteção de Dados (LGPD)** é a lei abrangente de proteção de dados do Brasil. Ao utilizar agentes de IA com dados de produção, a conformidade com a LGPD é essencial. O Surf Data foi projetado desde o início para ajudar você a atender a esses requisitos.
+
+## Princípios da LGPD suportados
+
+| Princípio da LGPD | Como o Surf Data ajuda |
+|----------------|-------------------|
+| **Limitação de Finalidade** | As ferramentas expõem apenas os dados necessários para casos de uso específicos |
+| **Minimização de Dados** | Agent Views controlam exatamente quais colunas são acessíveis |
+| **Segurança** | Conexões criptografadas, armazenamento criptografado, autenticação baseada em tokens |
+| **Transparência** | Logs de auditoria completos de cada acesso a dados |
+| **Responsabilização** | Rastreamento de uso e sistema de alertas |
+
+## Recursos integrados de conformidade
+
+### Controle de acesso a dados
+
+<CardGroup cols={2}>
+  <Card title="Agent Views" icon="eye">
+    Controle exatamente quais tabelas, colunas e linhas os agentes podem acessar por meio de consultas SQL curadas.
+  </Card>
+  <Card title="Mascaramento de PII" icon="mask">
+    Mascare automaticamente dados sensíveis (emails, CPFs, números de telefone) antes que cheguem aos agentes.
+  </Card>
+  <Card title="Acesso somente leitura" icon="lock">
+    Operações SQL destrutivas (INSERT, UPDATE, DELETE, DROP) são bloqueadas no nível da plataforma.
+  </Card>
+  <Card title="Limites de linhas" icon="list-ol">
+    LIMIT 100 automático em todas as queries previne a extração em massa de dados.
+  </Card>
+</CardGroup>
+
+### Auditoria e transparência
+
+<CardGroup cols={2}>
+  <Card title="Logs de invocação" icon="clock-rotate-left">
+    Cada execução de ferramenta é registrada com a query, parâmetros, usuário, timestamp e contagem de resultados.
+  </Card>
+  <Card title="Rastreamento de uso" icon="chart-bar">
+    Monitore padrões de acesso a dados por organização, projeto e ferramenta.
+  </Card>
+  <Card title="Rastreamento de tokens" icon="key">
+    Saiba exatamente qual token (e, portanto, qual agente) acessou seus dados.
+  </Card>
+  <Card title="Sistema de alertas" icon="bell">
+    Receba notificações quando o uso se aproximar ou exceder os limites definidos.
+  </Card>
+</CardGroup>
+
+## Checklist de conformidade
+
+Use este checklist para garantir que sua configuração do Surf Data atenda aos requisitos da LGPD:
+
+<Steps>
+  <Step title="Identifique dados pessoais">
+    Audite as tabelas do seu banco de dados e identifique colunas contendo dados pessoais (PII):
+    - Nomes, emails, números de telefone
+    - Números de CPF, CNPJ, RG
+    - Endereços, dados de localização
+    - Informações financeiras
+    - Dados de saúde
+  </Step>
+  <Step title="Aplique a minimização de dados">
+    Crie Agent Views que exponham **apenas** as colunas que os agentes precisam. Exclua todos os dados pessoais desnecessários.
+  </Step>
+  <Step title="Habilite o mascaramento de PII">
+    Para ferramentas que precisam acessar dados pessoais, habilite [políticas de mascaramento de dados](/pt-br/security/data-masking) para proteger campos sensíveis.
+  </Step>
+  <Step title="Use credenciais somente leitura">
+    Configure as conexões de datasource com usuários de banco de dados somente leitura para prevenir modificação de dados.
+  </Step>
+  <Step title="Configure o monitoramento">
+    Habilite [alertas de uso](/pt-br/monitoring/alerts) para rastrear o acesso a dados e detectar anomalias.
+  </Step>
+  <Step title="Revise os logs de auditoria">
+    Revise regularmente os [logs de invocação](/pt-br/monitoring/evals) para garantir que os padrões de acesso a dados correspondam ao uso esperado.
+  </Step>
+  <Step title="Documente sua configuração">
+    Mantenha registros das suas políticas de acesso a dados, regras de mascaramento e controles de acesso para auditorias regulatórias.
+  </Step>
+</Steps>
+
+## Residência de dados
+
+O Surf Data processa e armazena dados em conformidade com os requisitos da LGPD:
+
+- Dados de usuários e configurações são armazenados em bancos de dados gerenciados
+- Consultas ao banco de dados são executadas em tempo real e os resultados não são armazenados em cache nem persistidos
+- Os logs de invocação registram metadados (texto da query, parâmetros, contagem de linhas), mas não os resultados das queries
+- Hashes dos tokens são armazenados — tokens em texto plano nunca são persistidos
+
+<Note>
+  Clientes do plano Enterprise podem solicitar infraestrutura dedicada com requisitos específicos de residência de dados. Entre em contato com nossa equipe comercial para mais detalhes.
+</Note>
+
+## Direitos do titular dos dados
+
+A LGPD concede aos indivíduos direitos específicos sobre seus dados. O Surf Data suporta esses direitos através de:
+
+| Direito | Implementação |
+|-------|---------------|
+| **Direito de acesso** | Logs de auditoria mostram quais dados foram acessados e quando |
+| **Direito de correção** | Os agentes têm acesso somente leitura; correções devem ser feitas diretamente no banco de dados |
+| **Direito de exclusão** | Exclua contas de usuário, organizações e todos os dados associados pelo painel |
+| **Direito de portabilidade** | Exporte sua configuração (projetos, views, ferramentas) via API |
+| **Direito de revogar consentimento** | Revogue tokens MCP para cortar imediatamente o acesso dos agentes |

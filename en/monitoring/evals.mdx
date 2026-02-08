@@ -1,0 +1,100 @@
+---
+title: "Evaluations"
+description: "Monitor tool performance and review execution history"
+---
+
+## Overview
+
+The **Evaluations (Evals)** dashboard provides detailed insights into your tool executions. Review individual invocations, track success rates, and identify issues.
+
+<Note>
+  The Evals dashboard is available on the **Growth** and **Enterprise** plans.
+</Note>
+
+## Accessing evaluations
+
+Navigate to **Evals** in the sidebar to view the evaluations dashboard.
+
+## Invocation logs
+
+Every tool execution is recorded as an **invocation log** with the following details:
+
+| Field | Description |
+|-------|-------------|
+| **Tool name** | Which MCP tool was called |
+| **Token** | Which token authenticated the request (name + prefix) |
+| **Status** | `SUCCESS`, `ERROR`, or `TIMEOUT` |
+| **Query template** | The SQL query with parameter placeholders |
+| **Executed query** | The actual SQL query that was run |
+| **Parameters** | The arguments passed by the agent |
+| **Duration** | Execution time in milliseconds |
+| **Row count** | Number of rows returned |
+| **Timestamp** | When the execution started and completed |
+| **Error details** | Error code and message (if failed) |
+
+## Filtering logs
+
+Filter invocation logs by:
+
+- **Status** — Success, Error, Timeout
+- **Tool** — specific MCP tool
+- **Token** — specific access token
+- **Date range** — custom time window
+- **Project** — specific project
+
+## Identifying issues
+
+### Common error patterns
+
+<AccordionGroup>
+  <Accordion title="SQL syntax errors">
+    **Symptom**: Status is `ERROR` with a database error message.
+
+    **Solution**: Review the executed query in the log. Check for:
+    - Typos in column or table names
+    - Missing quotes or brackets
+    - Invalid parameter substitutions
+  </Accordion>
+
+  <Accordion title="Connection timeouts">
+    **Symptom**: Status is `TIMEOUT`.
+
+    **Solution**:
+    - Check your database server's network accessibility
+    - Verify the query isn't too complex or returning too many rows
+    - Ensure your database isn't overloaded
+  </Accordion>
+
+  <Accordion title="Permission errors">
+    **Symptom**: Status is `ERROR` with "permission denied" message.
+
+    **Solution**: Verify your database user has SELECT permissions on the required tables and schemas.
+  </Accordion>
+
+  <Accordion title="Limit reached">
+    **Symptom**: Status is `ERROR` with error code `LIMIT_REACHED`.
+
+    **Solution**: Your organization has exceeded its monthly execution limit. [Upgrade your plan](/en/organizations/billing) or wait for the next billing cycle.
+  </Accordion>
+</AccordionGroup>
+
+## Performance analysis
+
+Use the evals dashboard to optimize your tools:
+
+1. **Identify slow queries** — sort by duration to find the slowest executions
+2. **Check row counts** — high row counts may indicate overly broad queries
+3. **Review error rates** — tools with high error rates may need parameter validation
+4. **Monitor trends** — watch for degrading performance over time
+
+## Audit trail
+
+Invocation logs serve as a complete audit trail for compliance:
+
+- **Who** accessed data (token identification)
+- **What** data was queried (executed query + parameters)
+- **When** the access occurred (timestamps)
+- **How much** data was returned (row count)
+- **Result** of the access (success/error)
+
+This audit trail supports [LGPD compliance](/en/security/lgpd) requirements for data access transparency.

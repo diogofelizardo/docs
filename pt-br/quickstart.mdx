@@ -1,0 +1,171 @@
+---
+title: "Início Rápido"
+description: "Conecte seu banco de dados a agentes de IA em menos de 5 minutos"
+---
+
+## Pré-requisitos
+
+- Uma conta no Surf Data ([cadastre-se aqui](https://surfdata.com.br/sign-up))
+- Acesso a um banco de dados PostgreSQL ou MySQL
+- Um agente de IA compatível com MCP (Claude, Cursor, etc.)
+
+## Guia passo a passo
+
+<Steps>
+  <Step title="Crie sua organização">
+    Após se cadastrar, você será guiado para criar sua organização. É aqui que sua equipe, projetos e faturamento são gerenciados.
+
+    Escolha o plano que melhor atende às suas necessidades:
+
+    | Plano | Execuções/mês | Datasources |
+    |-------|--------------|-------------|
+    | Starter (R$99) | 5.000 | 1 |
+    | Team (R$199) | 10.000 | 3 |
+    | Growth (R$499) | 25.000 | 5 |
+
+    Todos os planos incluem um **teste gratuito de 14 dias**.
+  </Step>
+
+  <Step title="Crie um projeto">
+    Navegue até o **Dashboard** e clique em **New Project**. Dê um nome e uma descrição.
+
+    Um projeto agrupa seus datasources, views e ferramentas MCP. Pense nele como um workspace para um caso de uso específico (ex.: "Agente de Suporte ao Cliente" ou "Análise de Vendas").
+  </Step>
+
+  <Step title="Adicione um datasource">
+    Dentro do seu projeto, clique em **Add Datasource** e escolha o tipo do seu banco de dados:
+
+    <Tabs>
+      <Tab title="PostgreSQL">
+        Insira os dados da conexão:
+        ```
+        Host: your-db-host.com
+        Port: 5432
+        Database: mydb
+        Username: readonly_user
+        Password: ********
+        SSL: Enabled
+        ```
+        Ou use uma string de conexão:
+        ```
+        postgresql://readonly_user:password@your-db-host.com:5432/mydb?sslmode=require
+        ```
+      </Tab>
+      <Tab title="MySQL">
+        Insira os dados da conexão:
+        ```
+        Host: your-db-host.com
+        Port: 3306
+        Database: mydb
+        Username: readonly_user
+        Password: ********
+        ```
+        Ou use uma string de conexão:
+        ```
+        mysql://readonly_user:password@your-db-host.com:3306/mydb
+        ```
+      </Tab>
+      <Tab title="Demo">
+        Selecione **Demo** para usar um banco de dados de exemplo pré-configurado. Sem necessidade de credenciais — perfeito para testes.
+      </Tab>
+    </Tabs>
+
+    Clique em **Test Connection** para verificar e depois em **Connect** para salvar.
+  </Step>
+
+  <Step title="Crie uma Agent View">
+    Uma Agent View é uma consulta SQL salva que define quais dados estão disponíveis. Clique em **New View** e escreva sua consulta:
+
+    ```sql
+    SELECT id, name, email, created_at
+    FROM customers
+    WHERE status = 'active'
+    ```
+
+    Dê um nome descritivo como `active_customers`.
+  </Step>
+
+  <Step title="Crie uma MCP Tool">
+    Tools são as funções que os agentes de IA podem chamar. Crie uma tool vinculada à sua view:
+
+    - **Name**: `get_customer_by_id`
+    - **Description**: "Recupera os detalhes do cliente pelo ID"
+    - **SQL Query**:
+      ```sql
+      SELECT id, name, email, created_at
+      FROM customers
+      WHERE id = {customer_id}
+      ```
+    - **Parameters**: Adicione `customer_id` (type: string, required: true)
+
+    Clique em **Test Run** com um valor de exemplo para verificar se funciona.
+  </Step>
+
+  <Step title="Publique seu projeto">
+    Clique no botão **Publish** para disponibilizar suas tools via MCP:
+
+    1. Selecione quais tools publicar
+    2. Nomeie seu token de acesso (ex.: "claude-integration")
+    3. Copie sua **URL do endpoint MCP** e o **Bearer token**
+
+    <Warning>
+      Salve seu token imediatamente — ele é exibido apenas uma vez e não pode ser recuperado posteriormente.
+    </Warning>
+  </Step>
+
+  <Step title="Conecte ao seu agente de IA">
+    Use a URL do endpoint MCP e o token para conectar seu agente.
+
+    <Tabs>
+      <Tab title="Claude Desktop">
+        Adicione ao seu `claude_desktop_config.json`:
+        ```json
+        {
+          "mcpServers": {
+            "surf-data": {
+              "url": "https://surfdata.com.br/mcp/http",
+              "headers": {
+                "Authorization": "Bearer your-token-here"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+      <Tab title="Cursor">
+        Adicione ao seu `.cursor/mcp.json`:
+        ```json
+        {
+          "mcpServers": {
+            "surf-data": {
+              "url": "https://surfdata.com.br/mcp/http",
+              "headers": {
+                "Authorization": "Bearer your-token-here"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+    </Tabs>
+
+    Seu agente agora tem acesso às tools que você publicou. Tente perguntar: *"Obtenha os detalhes do cliente com ID 123"*.
+  </Step>
+</Steps>
+
+## Próximos passos
+
+<CardGroup cols={2}>
+  <Card title="Aprenda os conceitos" icon="lightbulb" href="/pt-br/concepts">
+    Entenda o modelo de dados e a arquitetura.
+  </Card>
+  <Card title="Configure a segurança" icon="shield-halved" href="/pt-br/security/data-masking">
+    Configure o mascaramento de PII e as políticas de acesso.
+  </Card>
+  <Card title="Monitore o uso" icon="chart-line" href="/pt-br/monitoring/consumption">
+    Acompanhe execuções e configure alertas.
+  </Card>
+  <Card title="Explore a API" icon="code" href="/pt-br/api-reference/introduction">
+    Automatize com a REST API.
+  </Card>
+</CardGroup>

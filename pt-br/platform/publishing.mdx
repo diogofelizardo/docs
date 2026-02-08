@@ -1,0 +1,162 @@
+---
+title: "Publicação"
+description: "Disponibilize suas tools para agentes de IA via MCP"
+---
+
+## Visão Geral
+
+**Publicação** é o processo de tornar as MCP Tools do seu projeto acessíveis para agentes de IA. Quando você publica um projeto, o Surf Data gera uma URL de endpoint MCP e um Bearer token que os agentes usam para descobrir e chamar suas tools.
+
+## Fluxo de publicação
+
+<Steps>
+  <Step title="Abra o diálogo de publicação">
+    Clique no botão **Publish** no editor do seu projeto. Isso abre um assistente passo a passo.
+  </Step>
+  <Step title="Selecione as tools">
+    Escolha quais tools disponibilizar. Você pode:
+    - Selecionar tools individuais
+    - Usar **Select All** para incluir todas
+    - Revisar sua seleção antes de prosseguir
+
+    Apenas as tools selecionadas serão descobríveis via `tools/list`.
+  </Step>
+  <Step title="Configure o token">
+    Nomeie seu token de acesso (ex: "claude-production", "n8n-integration"). O nome ajuda a identificar tokens posteriormente.
+
+    Você verá uma prévia de:
+    - A URL do endpoint MCP
+    - Quais tools serão publicadas
+  </Step>
+  <Step title="Copie as credenciais">
+    Após a publicação, você receberá:
+    - **URL do Endpoint MCP**: `https://surfdata.com.br/mcp/http`
+    - **Bearer Token**: Um token de acesso único
+
+    <Warning>
+      O Bearer token é exibido **apenas uma vez**. Copie-o imediatamente e armazene-o com segurança. Se você perdê-lo, precisará gerar um novo token.
+    </Warning>
+  </Step>
+</Steps>
+
+## Endpoint MCP
+
+A URL do endpoint MCP é a mesma para todos os projetos:
+
+```
+https://surfdata.com.br/mcp/http
+```
+
+O Bearer token no header `Authorization` determina qual projeto e quais tools o agente pode acessar.
+
+### Autenticação
+
+Todas as requisições devem incluir o Bearer token:
+
+```
+Authorization: Bearer sk_live_<your-token>
+```
+
+### Métodos suportados
+
+| Método | Descrição |
+|--------|-------------|
+| `initialize` | Handshake — retorna as capacidades do servidor |
+| `tools/list` | Retorna as tools disponíveis e seus schemas |
+| `tools/call` | Executa uma tool com argumentos |
+| `ping` | Verificação de saúde |
+
+## Despublicando
+
+Você pode despublicar um projeto a qualquer momento:
+
+1. Abra as configurações do projeto
+2. Clique em **Unpublish**
+3. Confirme a ação
+
+<Warning>
+  Despublicar desativa imediatamente todos os tokens do projeto. Os agentes não poderão mais acessar suas tools. Esta ação é reversível — você pode republicar posteriormente.
+</Warning>
+
+## Gerenciando tokens
+
+Após a publicação, você pode gerenciar seus tokens nas configurações do projeto:
+
+- **Gerar novos tokens** — crie tokens adicionais para diferentes agentes ou ambientes
+- **Ativar/desativar** — alterne tokens sem excluí-los
+- **Definir expiração** — opcionalmente defina uma data de expiração
+- **Revogar** — exclua permanentemente um token
+
+Consulte [Gerenciamento de Tokens](/pt-br/security/tokens) para gerenciamento detalhado de tokens.
+
+## Conectando agentes
+
+<Tabs>
+  <Tab title="Claude Desktop">
+    Adicione ao `claude_desktop_config.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Claude Code">
+    Adicione ao `.mcp.json` do seu projeto:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Cursor">
+    Adicione ao `.cursor/mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="HTTP (direto)">
+    Faça requisições JSON-RPC 2.0 diretamente:
+
+    ```bash
+    curl -X POST https://surfdata.com.br/mcp/http \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer your-token-here" \
+      -d '{
+        "jsonrpc": "2.0",
+        "method": "tools/list",
+        "id": 1
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+Para guias de integração detalhados, consulte:
+- [Integração com Claude](/pt-br/integrations/claude)
+- [Integração com Cursor](/pt-br/integrations/cursor)
+- [Agentes Customizados](/pt-br/integrations/custom-agents)

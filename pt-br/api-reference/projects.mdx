@@ -1,0 +1,161 @@
+---
+title: "API de Projetos"
+description: "Criar, listar, atualizar e excluir projetos"
+---
+
+## Listar projetos
+
+Retorna todos os projetos da organização autenticada.
+
+```
+GET /api/projects
+```
+
+### Resposta
+
+```json
+{
+  "projects": [
+    {
+      "id": "clx1234567890",
+      "name": "Customer Support Agent",
+      "description": "Tools for customer lookup and order tracking",
+      "organizationId": "org_123",
+      "createdById": "user_456",
+      "isPublished": true,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-20T14:00:00Z",
+      "_count": {
+        "datasources": 2,
+        "agentViews": 5,
+        "mcpTools": 8
+      }
+    }
+  ]
+}
+```
+
+<ResponseField name="projects" type="object[]" required>
+  Array de objetos de projeto.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Identificador único do projeto</ResponseField>
+    <ResponseField name="name" type="string" required>Nome do projeto</ResponseField>
+    <ResponseField name="description" type="string">Descrição do projeto</ResponseField>
+    <ResponseField name="organizationId" type="string" required>ID da organização proprietária</ResponseField>
+    <ResponseField name="isPublished" type="boolean" required>Se o projeto está publicado</ResponseField>
+    <ResponseField name="createdAt" type="string" required>Timestamp de criação em ISO 8601</ResponseField>
+    <ResponseField name="updatedAt" type="string" required>Timestamp da última atualização em ISO 8601</ResponseField>
+    <ResponseField name="_count" type="object">
+      Contagem de recursos.
+      <Expandable>
+        <ResponseField name="datasources" type="number">Número de datasources</ResponseField>
+        <ResponseField name="agentViews" type="number">Número de Agent Views</ResponseField>
+        <ResponseField name="mcpTools" type="number">Número de MCP Tools</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Criar projeto
+
+Cria um novo projeto na organização autenticada.
+
+```
+POST /api/projects
+```
+
+### Corpo da requisição
+
+<ParamField body="name" type="string" required>
+  O nome do projeto. Deve ser não vazio.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Descrição opcional do projeto.
+</ParamField>
+
+### Exemplo
+
+```bash
+curl -X POST https://surfdata.com.br/api/projects \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Sales Analytics Bot",
+    "description": "Tools for revenue and pipeline queries"
+  }'
+```
+
+### Resposta
+
+```json
+{
+  "id": "clx1234567890",
+  "name": "Sales Analytics Bot",
+  "description": "Tools for revenue and pipeline queries",
+  "organizationId": "org_123",
+  "createdById": "user_456",
+  "isPublished": false,
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## Obter projeto
+
+Retorna um único projeto pelo ID.
+
+```
+GET /api/projects/{id}
+```
+
+<ParamField path="id" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Resposta
+
+Retorna o objeto do projeto com detalhes completos, incluindo relações.
+
+---
+
+## Atualizar projeto
+
+Atualiza o nome ou a descrição de um projeto.
+
+```
+PUT /api/projects/{id}
+```
+
+<ParamField path="id" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Novo nome do projeto.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Nova descrição do projeto.
+</ParamField>
+
+---
+
+## Excluir projeto
+
+Exclui permanentemente um projeto e todos os seus recursos (datasources, views, tools, tokens).
+
+```
+DELETE /api/projects/{id}
+```
+
+<ParamField path="id" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+<Warning>
+  Esta ação é irreversível. Todos os datasources, views, tools e tokens associados ao projeto serão excluídos permanentemente.
+</Warning>

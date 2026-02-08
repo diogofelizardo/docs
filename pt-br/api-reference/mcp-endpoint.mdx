@@ -1,0 +1,309 @@
+---
+title: "Endpoint MCP"
+description: "Endpoint JSON-RPC 2.0 do Model Context Protocol para agentes de IA"
+---
+
+## Visão geral
+
+O endpoint MCP é a interface principal para agentes de IA interagirem com suas tools publicadas. Ele implementa o **Model Context Protocol** usando **JSON-RPC 2.0** sobre HTTP.
+
+## Endpoint
+
+```
+POST https://surfdata.com.br/mcp/http
+```
+
+### Autenticação
+
+```
+Authorization: Bearer sk_live_<your-token>
+```
+
+### Tipo de conteúdo
+
+```
+Content-Type: application/json
+```
+
+## Informações do servidor
+
+```
+GET https://surfdata.com.br/mcp/http
+```
+
+Retorna metadados do servidor sem autenticação:
+
+```json
+{
+  "name": "surf-data-mcp",
+  "version": "1.0.0",
+  "protocol": "MCP",
+  "protocolVersion": "2024-11-05",
+  "authentication": {
+    "type": "bearer",
+    "header": "Authorization"
+  }
+}
+```
+
+---
+
+## Métodos
+
+### initialize
+
+Handshake com o servidor. Retorna as capacidades e a versão do protocolo.
+
+**Requisição:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "my-agent",
+      "version": "1.0.0"
+    }
+  },
+  "id": 1
+}
+```
+
+**Resposta:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "tools": {}
+    },
+    "serverInfo": {
+      "name": "surf-data-mcp",
+      "version": "1.0.0"
+    }
+  },
+  "id": 1
+}
+```
+
+---
+
+### tools/list
+
+Lista todas as tools disponíveis para o projeto autenticado.
+
+**Requisição:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/list",
+  "id": 2
+}
+```
+
+**Resposta:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "tools": [
+      {
+        "name": "get_customer_by_id",
+        "description": "Retrieves customer details by their unique ID",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "description": "The unique customer identifier"
+            }
+          },
+          "required": ["customer_id"]
+        }
+      },
+      {
+        "name": "search_orders",
+        "description": "Searches orders by customer ID and optional date range",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "description": "Customer ID to search orders for"
+            },
+            "start_date": {
+              "type": "string",
+              "description": "Start date in YYYY-MM-DD format"
+            }
+          },
+          "required": ["customer_id"]
+        }
+      }
+    ]
+  },
+  "id": 2
+}
+```
+
+---
+
+### tools/call
+
+Executa uma tool com os argumentos fornecidos.
+
+**Requisição:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "get_customer_by_id",
+    "arguments": {
+      "customer_id": "12345"
+    }
+  },
+  "id": 3
+}
+```
+
+**Resposta (sucesso):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[{\"id\":\"12345\",\"name\":\"João Silva\",\"email\":\"joao@example.com\",\"plan\":\"growth\"}]"
+      }
+    ]
+  },
+  "id": 3
+}
+```
+
+**Resposta (erro):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Error: Tool 'unknown_tool' not found"
+      }
+    ],
+    "isError": true
+  },
+  "id": 3
+}
+```
+
+### Pipeline de execução
+
+Quando `tools/call` é invocado, o seguinte pipeline é executado:
+
+<Steps>
+  <Step title="Validação do token">
+    Verifica se o Bearer token é válido, ativo e não expirado.
+  </Step>
+  <Step title="Verificação de limite">
+    Verifica a cota mensal de execuções da organização.
+  </Step>
+  <Step title="Busca da tool">
+    Encontra a tool solicitada pelo nome no projeto.
+  </Step>
+  <Step title="Substituição de parâmetros">
+    Substitui os placeholders `{parameter}` pelos valores dos argumentos fornecidos. Os valores são escapados para prevenir injeção SQL.
+  </Step>
+  <Step title="Verificação de segurança da query">
+    Valida que a query não contém padrões SQL destrutivos (DROP, DELETE, UPDATE, INSERT, ALTER, TRUNCATE, CREATE, GRANT, REVOKE).
+  </Step>
+  <Step title="Adição de limite de linhas">
+    Se a query não possui uma cláusula LIMIT, adiciona `LIMIT 100`.
+  </Step>
+  <Step title="Execução da query">
+    Conecta à datasource (descriptografando as credenciais) e executa a query com timeout.
+  </Step>
+  <Step title="Aplicação de políticas">
+    Se as políticas de mascaramento estão habilitadas, aplica-as ao conjunto de resultados.
+  </Step>
+  <Step title="Log de invocação">
+    Registra os detalhes da execução (tool, parâmetros, duração, status, contagem de linhas).
+  </Step>
+  <Step title="Rastreamento de uso">
+    Incrementa o contador de execuções da organização.
+  </Step>
+  <Step title="Retorno dos resultados">
+    Retorna os resultados da query (limitados a 100 linhas) ao agente.
+  </Step>
+</Steps>
+
+---
+
+### ping
+
+Endpoint de verificação de saúde.
+
+**Requisição:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "ping",
+  "id": 4
+}
+```
+
+**Resposta:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {},
+  "id": 4
+}
+```
+
+---
+
+## Códigos de erro
+
+| Código | Mensagem | Descrição |
+|--------|----------|-----------|
+| `-32600` | Requisição inválida | Requisição JSON-RPC malformada |
+| `-32601` | Método não encontrado | Nome de método MCP desconhecido |
+| `-32602` | Parâmetros inválidos | Parâmetros ausentes ou inválidos |
+| `-32603` | Erro interno | Erro inesperado do servidor |
+
+### Erros de aplicação
+
+| Erro | Causa | Resolução |
+|------|-------|-----------|
+| Header de autorização ausente | Nenhum header `Authorization` fornecido | Adicione `Authorization: Bearer <token>` |
+| Token inválido | Token não encontrado ou formato inválido | Verifique o valor do token |
+| Token inativo | Token desativado | Reative ou gere um novo token |
+| Token expirado | Data de expiração ultrapassada | Gere um novo token |
+| Projeto não publicado | Projeto está despublicado | Publique o projeto primeiro |
+| Limite de execuções atingido | Cota mensal excedida | Faça upgrade do plano ou aguarde o reset |
+| Tool não encontrada | Nome da tool não corresponde | Verifique `tools/list` para nomes válidos |
+| Query destrutiva detectada | SQL destrutivo bloqueado | Corrija a query para ser somente leitura |
+
+## Limites
+
+| Limite | Valor |
+|--------|-------|
+| Máximo de linhas no resultado | 100 |
+| Timeout da query | Definido pela plataforma |
+| Máximo de execuções | Dependente do plano (5K a ilimitado) |
+| Tamanho do corpo da requisição | Limites HTTP padrão |

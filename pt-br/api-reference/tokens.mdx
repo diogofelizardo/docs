@@ -1,0 +1,154 @@
+---
+title: "API de Tokens"
+description: "Gere e gerencie tokens de acesso MCP"
+---
+
+## Listar tokens
+
+Retorna todos os tokens de um projeto.
+
+```
+GET /api/projects/{projectId}/tokens
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "tokens": [
+    {
+      "id": "tok_abc123",
+      "name": "claude-production",
+      "tokenPrefix": "sk_live_",
+      "projectId": "clx1234567890",
+      "isActive": true,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "lastUsedAt": "2024-01-20T14:00:00Z",
+      "expiresAt": null
+    }
+  ]
+}
+```
+
+<ResponseField name="tokens" type="object[]" required>
+  Array de objetos de token.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Identificador único do token</ResponseField>
+    <ResponseField name="name" type="string" required>Nome legível do token</ResponseField>
+    <ResponseField name="tokenPrefix" type="string" required>Primeiros 8 caracteres para identificação</ResponseField>
+    <ResponseField name="isActive" type="boolean" required>Se o token está atualmente ativo</ResponseField>
+    <ResponseField name="createdAt" type="string" required>Timestamp de criação em ISO 8601</ResponseField>
+    <ResponseField name="lastUsedAt" type="string">Timestamp do último uso em ISO 8601</ResponseField>
+    <ResponseField name="expiresAt" type="string">Data de expiração em ISO 8601 (null = sem expiração)</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Note>
+  O valor completo do token nunca é retornado após a criação. Apenas o `tokenPrefix` está disponível para identificação.
+</Note>
+
+---
+
+## Gerar token
+
+Cria um novo token de acesso MCP.
+
+```
+POST /api/projects/{projectId}/tokens
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Nome legível para o token. Padrão: "Default Token".
+</ParamField>
+
+<ParamField body="expiresAt" type="string">
+  Data de expiração opcional em ISO 8601.
+</ParamField>
+
+### Exemplo
+
+```bash
+curl -X POST https://surfdata.com.br/api/projects/clx123/tokens \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "cursor-development",
+    "expiresAt": "2025-06-01T00:00:00Z"
+  }'
+```
+
+### Resposta
+
+```json
+{
+  "token": {
+    "id": "tok_xyz789",
+    "name": "cursor-development",
+    "tokenPrefix": "sk_live_",
+    "plainToken": "sk_live_<your-token>",
+    "projectId": "clx1234567890",
+    "isActive": true,
+    "createdAt": "2024-01-15T10:30:00Z",
+    "expiresAt": "2025-06-01T00:00:00Z"
+  }
+}
+```
+
+<Warning>
+  O campo `plainToken` é **incluído apenas na resposta de criação**. Armazene-o imediatamente — ele não pode ser recuperado novamente.
+</Warning>
+
+---
+
+## Atualizar token
+
+Atualiza o nome ou o status ativo de um token.
+
+```
+PATCH /api/projects/{projectId}/tokens/{tokenId}
+```
+
+<ParamField path="tokenId" type="string" required>
+  O ID do token.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Novo nome legível.
+</ParamField>
+
+<ParamField body="isActive" type="boolean">
+  Defina como `false` para desativar ou `true` para reativar.
+</ParamField>
+
+### Exemplo: Desativar um token
+
+```bash
+curl -X PATCH https://surfdata.com.br/api/projects/clx123/tokens/tok_xyz789 \
+  -H "Content-Type: application/json" \
+  -d '{"isActive": false}'
+```
+
+---
+
+## Revogar token
+
+Exclui permanentemente um token.
+
+```
+DELETE /api/projects/{projectId}/tokens/{tokenId}
+```
+
+<ParamField path="tokenId" type="string" required>
+  O ID do token.
+</ParamField>
+
+<Warning>
+  Esta ação não pode ser desfeita. Qualquer agente usando este token perderá acesso imediatamente.
+</Warning>

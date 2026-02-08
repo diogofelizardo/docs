@@ -1,0 +1,146 @@
+---
+title: "Claude Integration"
+description: "Connect Surf Data to Claude Desktop and Claude Code"
+---
+
+## Overview
+
+Surf Data integrates natively with Claude through the **Model Context Protocol (MCP)**. Once configured, Claude can discover and call your published tools to query your databases directly in conversation.
+
+## Claude Desktop
+
+### Setup
+
+<Steps>
+  <Step title="Publish your project">
+    Make sure your Surf Data project is [published](/en/platform/publishing) and you have a Bearer token.
+  </Step>
+  <Step title="Open Claude Desktop settings">
+    In Claude Desktop, navigate to **Settings** → **Developer** → **Edit Config**.
+
+    This opens the `claude_desktop_config.json` file.
+  </Step>
+  <Step title="Add the MCP server">
+    Add Surf Data as an MCP server:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer sk_live_your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+  <Step title="Restart Claude Desktop">
+    Close and reopen Claude Desktop. You should see the Surf Data tools available in the tools menu.
+  </Step>
+</Steps>
+
+### Usage
+
+Once configured, you can ask Claude to use your tools naturally:
+
+> "Look up customer with ID 12345"
+
+> "What are the top 10 orders this month?"
+
+> "Find all active subscriptions for the Growth plan"
+
+Claude will automatically select the appropriate tool, pass the right parameters, and present the results in a readable format.
+
+### Multiple projects
+
+To connect multiple Surf Data projects, add separate entries:
+
+```json
+{
+  "mcpServers": {
+    "surf-data-customers": {
+      "url": "https://surfdata.com.br/mcp/http",
+      "headers": {
+        "Authorization": "Bearer sk_live_customer-token"
+      }
+    },
+    "surf-data-analytics": {
+      "url": "https://surfdata.com.br/mcp/http",
+      "headers": {
+        "Authorization": "Bearer sk_live_analytics-token"
+      }
+    }
+  }
+}
+```
+
+## Claude Code
+
+### Setup
+
+<Steps>
+  <Step title="Create the MCP config">
+    In your project root, create a `.mcp.json` file:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer sk_live_your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+  <Step title="Start Claude Code">
+    Launch Claude Code in your terminal. It will automatically detect the MCP configuration and connect to Surf Data.
+  </Step>
+</Steps>
+
+### Usage in Claude Code
+
+Claude Code can use your Surf Data tools while working on code:
+
+```
+> Use the get_customer_by_id tool to fetch customer 456 and help me
+  build a dashboard component for their data
+```
+
+```
+> Query the recent_orders tool and generate a TypeScript interface
+  matching the response structure
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Tools not appearing">
+    - Verify your project is published
+    - Check that the Bearer token is valid and not expired
+    - Restart Claude Desktop after changing the config
+    - Check the MCP server URL is correct
+  </Accordion>
+
+  <Accordion title="Authentication errors">
+    - Verify the token starts with `sk_live_`
+    - Check the token hasn't been revoked or deactivated
+    - Ensure the `Authorization` header format is `Bearer <token>` (with a space)
+  </Accordion>
+
+  <Accordion title="Tool execution failures">
+    - Check the [Evals dashboard](/en/monitoring/evals) for error details
+    - Verify your datasource connection is still valid
+    - Check if you've reached your execution limit
+  </Accordion>
+
+  <Accordion title="Slow responses">
+    - Complex queries may take longer; check execution times in the Evals dashboard
+    - Verify your database server is healthy and responsive
+    - Consider optimizing your SQL queries or adding database indexes
+  </Accordion>
+</AccordionGroup>

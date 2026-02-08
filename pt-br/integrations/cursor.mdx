@@ -1,0 +1,104 @@
+---
+title: "Integração com Cursor"
+description: "Conecte o Surf Data ao Cursor IDE como um servidor MCP"
+---
+
+## Visão geral
+
+O Cursor IDE suporta servidores MCP nativamente, permitindo que você consulte seus bancos de dados diretamente do editor. As ferramentas do Surf Data aparecem junto com as ferramentas nativas do Cursor.
+
+## Configuração
+
+<Steps>
+  <Step title="Publique seu projeto">
+    Certifique-se de que seu projeto Surf Data está [publicado](/pt-br/platform/publishing) e que você possui um Bearer token.
+  </Step>
+  <Step title="Crie o arquivo de configuração MCP">
+    Crie ou edite o arquivo `.cursor/mcp.json` na raiz do seu projeto:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://surfdata.com.br/mcp/http",
+          "headers": {
+            "Authorization": "Bearer sk_live_your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+  <Step title="Reinicie o Cursor">
+    Reinicie o Cursor ou recarregue a janela. Suas ferramentas do Surf Data deverão aparecer no painel de ferramentas MCP.
+  </Step>
+</Steps>
+
+## Uso
+
+No chat de IA do Cursor, você pode referenciar suas ferramentas de banco de dados:
+
+> "Use o surf-data para buscar o cliente com e-mail john@example.com"
+
+> "Consulte a ferramenta monthly_revenue e me ajude a atualizar o gráfico do dashboard"
+
+> "Verifique no banco de dados de pedidos se há pedidos criados hoje"
+
+O Cursor chamará a ferramenta apropriada do Surf Data e usará os resultados para ajudar nas suas tarefas de programação.
+
+## Configuração por projeto vs. global
+
+### Por projeto (recomendado)
+
+Coloque o arquivo `.cursor/mcp.json` na raiz do seu projeto. Isso é ideal para:
+- Compartilhamento com a equipe (adicione ao controle de versão, excluindo o token)
+- Datasources específicos do projeto
+
+### Configuração global
+
+Para ferramentas pessoais em todos os projetos, use as configurações globais do Cursor para adicionar o servidor MCP.
+
+## Usando variáveis de ambiente
+
+Para evitar que tokens sejam commitados no controle de versão, use variáveis de ambiente:
+
+```json
+{
+  "mcpServers": {
+    "surf-data": {
+      "url": "https://surfdata.com.br/mcp/http",
+      "headers": {
+        "Authorization": "Bearer ${SURF_DATA_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Defina a variável de ambiente no seu shell:
+
+```bash
+export SURF_DATA_TOKEN="sk_live_your-token-here"
+```
+
+## Solução de problemas
+
+<AccordionGroup>
+  <Accordion title="Servidor MCP não conecta">
+    - Verifique se o arquivo `.cursor/mcp.json` está no local correto
+    - Confirme que a sintaxe JSON é válida
+    - Reinicie o Cursor completamente (não apenas recarregue)
+    - Verifique o console de desenvolvedor do Cursor para mensagens de erro
+  </Accordion>
+
+  <Accordion title="Ferramentas não aparecem">
+    - Verifique se seu projeto Surf Data está publicado
+    - Confirme que o Bearer token é válido
+    - Tente acessar o endpoint MCP diretamente com curl para verificar a conectividade
+  </Accordion>
+
+  <Accordion title="Erros de permissão">
+    - Verifique se o token não expirou ou foi revogado
+    - Confirme que você não excedeu seu limite de execuções
+  </Accordion>
+</AccordionGroup>

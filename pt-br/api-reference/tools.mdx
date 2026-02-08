@@ -1,0 +1,221 @@
+---
+title: "API de Tools"
+description: "Crie e gerencie MCP tools dentro de projetos"
+---
+
+## Listar tools
+
+Retorna todas as MCP tools de um projeto.
+
+```
+GET /api/projects/{projectId}/tools
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "tools": [
+    {
+      "id": "tool_abc123",
+      "name": "get_customer_by_id",
+      "description": "Retrieves customer details by their ID",
+      "query": "SELECT id, name, email FROM customers WHERE id = {customer_id}",
+      "parameters": [
+        {
+          "name": "customer_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique customer identifier"
+        }
+      ],
+      "arguments": [],
+      "testValues": [
+        {"name": "customer_id", "value": "12345"}
+      ],
+      "policyEnabled": false,
+      "policyCode": null,
+      "projectId": "clx1234567890",
+      "datasourceId": "ds_abc123",
+      "viewId": "view_xyz789",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-20T14:00:00Z"
+    }
+  ]
+}
+```
+
+<ResponseField name="tools" type="object[]" required>
+  Array de objetos de MCP tool.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Identificador único da tool</ResponseField>
+    <ResponseField name="name" type="string" required>Nome da função da tool</ResponseField>
+    <ResponseField name="description" type="string" required>Descrição legível por humanos</ResponseField>
+    <ResponseField name="query" type="string" required>Template de query SQL com placeholders `{parameter}`</ResponseField>
+    <ResponseField name="parameters" type="object[]" required>
+      Definições de parâmetros.
+      <Expandable>
+        <ResponseField name="name" type="string" required>Nome do parâmetro</ResponseField>
+        <ResponseField name="type" type="string" required>Tipo: `string`, `number`, `boolean`, `date`</ResponseField>
+        <ResponseField name="required" type="boolean" required>Se o parâmetro é obrigatório</ResponseField>
+        <ResponseField name="description" type="string">Descrição para o agente de IA</ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="policyEnabled" type="boolean" required>Se o mascaramento de dados está habilitado</ResponseField>
+    <ResponseField name="policyCode" type="string">Código da política de mascaramento</ResponseField>
+    <ResponseField name="viewId" type="string" required>ID da Agent View vinculada</ResponseField>
+    <ResponseField name="datasourceId" type="string">ID da datasource vinculada</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Criar tool
+
+Cria uma nova MCP tool no projeto.
+
+```
+POST /api/projects/{projectId}/tools
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Nome da função da tool. Use snake_case (ex.: `get_customer_by_id`).
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Descrição do que a tool faz. Usada pelos agentes de IA para decidir quando chamá-la.
+</ParamField>
+
+<ParamField body="query" type="string">
+  Template de query SQL com placeholders `{parameter}`.
+</ParamField>
+
+<ParamField body="viewId" type="string" required>
+  ID da Agent View vinculada. Deve pertencer ao mesmo projeto.
+</ParamField>
+
+<ParamField body="datasourceId" type="string">
+  ID da datasource vinculada. Deve pertencer ao mesmo projeto.
+</ParamField>
+
+<ParamField body="parameters" type="object[]">
+  Array de definições de parâmetros.
+  <Expandable>
+    <ParamField body="name" type="string" required>Nome do parâmetro correspondente ao `{placeholder}` na query</ParamField>
+    <ParamField body="type" type="string" required>Um de: `string`, `number`, `boolean`, `date`</ParamField>
+    <ParamField body="required" type="boolean">Se o parâmetro é obrigatório. Padrão: false</ParamField>
+    <ParamField body="description" type="string">Descrição para agentes de IA</ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="policyEnabled" type="boolean">
+  Habilitar política de mascaramento de dados. Padrão: false.
+</ParamField>
+
+<ParamField body="policyCode" type="string">
+  Código JavaScript para a política de mascaramento.
+</ParamField>
+
+### Exemplo
+
+```bash
+curl -X POST https://surfdata.com.br/api/projects/clx123/tools \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "search_customers_by_email",
+    "description": "Searches for customers matching an email pattern",
+    "query": "SELECT id, name, email FROM customers WHERE email LIKE {email_pattern}",
+    "viewId": "view_xyz789",
+    "datasourceId": "ds_abc123",
+    "parameters": [
+      {
+        "name": "email_pattern",
+        "type": "string",
+        "required": true,
+        "description": "Email pattern to search for"
+      }
+    ]
+  }'
+```
+
+---
+
+## Obter tool
+
+Retorna uma única tool pelo ID.
+
+```
+GET /api/projects/{projectId}/tools/{toolId}
+```
+
+---
+
+## Atualizar tool
+
+Atualiza a configuração de uma tool.
+
+```
+PUT /api/projects/{projectId}/tools/{toolId}
+```
+
+Todos os campos são opcionais — apenas os campos fornecidos são atualizados.
+
+<ParamField body="name" type="string">Novo nome da tool</ParamField>
+<ParamField body="description" type="string">Nova descrição</ParamField>
+<ParamField body="query" type="string">Novo template de query SQL</ParamField>
+<ParamField body="parameters" type="object[]">Novas definições de parâmetros</ParamField>
+<ParamField body="testValues" type="object[]">Novos valores de teste</ParamField>
+<ParamField body="policyEnabled" type="boolean">Alternar mascaramento de dados</ParamField>
+<ParamField body="policyCode" type="string">Novo código de política de mascaramento</ParamField>
+
+---
+
+## Excluir tool
+
+Exclui permanentemente uma MCP tool.
+
+```
+DELETE /api/projects/{projectId}/tools/{toolId}
+```
+
+---
+
+## Testar tool
+
+Executa uma tool com parâmetros de teste.
+
+```
+POST /api/projects/{projectId}/tools/{toolId}/test
+```
+
+<ParamField body="parameters" type="object" required>
+  Pares chave-valor de nomes de parâmetros e valores de teste.
+</ParamField>
+
+<ParamField body="query" type="string">
+  Override de query opcional para testes.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "result": {
+    "columns": ["id", "name", "email"],
+    "rows": [
+      {"id": "12345", "name": "João Silva", "email": "joao@example.com"}
+    ],
+    "rowCount": 1,
+    "executionTime": 32
+  },
+  "substitutedQuery": "SELECT id, name, email FROM customers WHERE id = '12345'"
+}
+```

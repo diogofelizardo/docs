@@ -9,82 +9,171 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Documentation",
-        "groups": [
+        "language": "pt-BR",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "index",
-              "quickstart",
-              "concepts"
+            "tab": "Documentação",
+            "groups": [
+              {
+                "group": "Primeiros Passos",
+                "pages": [
+                  "pt-br/index",
+                  "pt-br/quickstart",
+                  "pt-br/concepts"
+                ]
+              },
+              {
+                "group": "Plataforma",
+                "pages": [
+                  "pt-br/platform/projects",
+                  "pt-br/platform/datasources",
+                  "pt-br/platform/agent-views",
+                  "pt-br/platform/mcp-tools",
+                  "pt-br/platform/publishing"
+                ]
+              },
+              {
+                "group": "Segurança",
+                "pages": [
+                  "pt-br/security/authentication",
+                  "pt-br/security/data-masking",
+                  "pt-br/security/lgpd",
+                  "pt-br/security/tokens"
+                ]
+              },
+              {
+                "group": "Organizações",
+                "pages": [
+                  "pt-br/organizations/setup",
+                  "pt-br/organizations/members",
+                  "pt-br/organizations/billing"
+                ]
+              },
+              {
+                "group": "Monitoramento",
+                "pages": [
+                  "pt-br/monitoring/consumption",
+                  "pt-br/monitoring/evals",
+                  "pt-br/monitoring/alerts"
+                ]
+              },
+              {
+                "group": "Integrações",
+                "pages": [
+                  "pt-br/integrations/claude",
+                  "pt-br/integrations/cursor",
+                  "pt-br/integrations/custom-agents"
+                ]
+              }
             ]
           },
           {
-            "group": "Platform",
-            "pages": [
-              "platform/projects",
-              "platform/datasources",
-              "platform/agent-views",
-              "platform/mcp-tools",
-              "platform/publishing"
-            ]
-          },
-          {
-            "group": "Security",
-            "pages": [
-              "security/authentication",
-              "security/data-masking",
-              "security/lgpd",
-              "security/tokens"
-            ]
-          },
-          {
-            "group": "Organizations",
-            "pages": [
-              "organizations/setup",
-              "organizations/members",
-              "organizations/billing"
-            ]
-          },
-          {
-            "group": "Monitoring",
-            "pages": [
-              "monitoring/consumption",
-              "monitoring/evals",
-              "monitoring/alerts"
-            ]
-          },
-          {
-            "group": "Integrations",
-            "pages": [
-              "integrations/claude",
-              "integrations/cursor",
-              "integrations/custom-agents"
+            "tab": "Referência da API",
+            "groups": [
+              {
+                "group": "Visão Geral",
+                "pages": [
+                  "pt-br/api-reference/introduction",
+                  "pt-br/api-reference/authentication"
+                ]
+              },
+              {
+                "group": "Endpoints",
+                "pages": [
+                  "pt-br/api-reference/projects",
+                  "pt-br/api-reference/datasources",
+                  "pt-br/api-reference/tools",
+                  "pt-br/api-reference/tokens",
+                  "pt-br/api-reference/publishing",
+                  "pt-br/api-reference/mcp-endpoint"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
-        "groups": [
+        "language": "en",
+        "tabs": [
           {
-            "group": "Overview",
-            "pages": [
-              "api-reference/introduction",
-              "api-reference/authentication"
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "en/index",
+                  "en/quickstart",
+                  "en/concepts"
+                ]
+              },
+              {
+                "group": "Platform",
+                "pages": [
+                  "en/platform/projects",
+                  "en/platform/datasources",
+                  "en/platform/agent-views",
+                  "en/platform/mcp-tools",
+                  "en/platform/publishing"
+                ]
+              },
+              {
+                "group": "Security",
+                "pages": [
+                  "en/security/authentication",
+                  "en/security/data-masking",
+                  "en/security/lgpd",
+                  "en/security/tokens"
+                ]
+              },
+              {
+                "group": "Organizations",
+                "pages": [
+                  "en/organizations/setup",
+                  "en/organizations/members",
+                  "en/organizations/billing"
+                ]
+              },
+              {
+                "group": "Monitoring",
+                "pages": [
+                  "en/monitoring/consumption",
+                  "en/monitoring/evals",
+                  "en/monitoring/alerts"
+                ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "en/integrations/claude",
+                  "en/integrations/cursor",
+                  "en/integrations/custom-agents"
+                ]
+              }
             ]
           },
           {
-            "group": "Endpoints",
-            "pages": [
-              "api-reference/projects",
-              "api-reference/datasources",
-              "api-reference/tools",
-              "api-reference/tokens",
-              "api-reference/publishing",
-              "api-reference/mcp-endpoint"
+            "tab": "API Reference",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "en/api-reference/introduction",
+                  "en/api-reference/authentication"
+                ]
+              },
+              {
+                "group": "Endpoints",
+                "pages": [
+                  "en/api-reference/projects",
+                  "en/api-reference/datasources",
+                  "en/api-reference/tools",
+                  "en/api-reference/tokens",
+                  "en/api-reference/publishing",
+                  "en/api-reference/mcp-endpoint"
+                ]
+              }
             ]
           }
         ]
@@ -94,12 +183,12 @@
       "anchors": [
         {
           "anchor": "Dashboard",
-          "href": "https://app.surfdata.io",
+          "href": "https://surfdata.com.br",
           "icon": "gauge"
         },
         {
           "anchor": "Status",
-          "href": "https://status.surfdata.io",
+          "href": "https://status.surfdata.com.br",
           "icon": "signal"
         }
       ]
@@ -113,13 +202,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:support@surfdata.io"
+        "href": "mailto:support@surfdata.com.br"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.surfdata.io"
+      "href": "https://surfdata.com.br"
     }
   },
   "contextual": {

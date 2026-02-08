@@ -1,0 +1,98 @@
+---
+title: "Membros e Funções"
+description: "Gerencie membros da equipe e controle de acesso baseado em funções"
+---
+
+## Visão geral
+
+O Surf Data utiliza **controle de acesso baseado em funções (RBAC)** para gerenciar quem pode fazer o quê dentro da sua organização. Os membros da equipe podem receber uma de duas funções.
+
+## Funções
+
+| Função | Descrição |
+|--------|-----------|
+| **Admin** | Acesso total a todas as configurações da organização, faturamento, gerenciamento de membros e projetos |
+| **Member** | Acesso a projetos e ferramentas; não pode gerenciar faturamento ou configurações da organização |
+
+### Matriz de permissões
+
+| Ação | Admin | Member |
+|------|-------|--------|
+| Criar/editar/excluir projetos | Sim | Sim |
+| Criar/gerenciar fontes de dados | Sim | Sim |
+| Criar/gerenciar ferramentas | Sim | Sim |
+| Publicar projetos | Sim | Sim |
+| Visualizar métricas de consumo | Sim | Sim |
+| Gerenciar configurações da organização | Sim | Não |
+| Gerenciar faturamento e planos | Sim | Não |
+| Convidar/remover membros | Sim | Não |
+| Alterar funções de membros | Sim | Não |
+
+## Convidando membros
+
+<Steps>
+  <Step title="Acesse Configurações">
+    Navegue até **Configurações** na barra lateral.
+  </Step>
+  <Step title="Abra a aba Membros">
+    Clique na seção de membros da página de configurações.
+  </Step>
+  <Step title="Envie um convite">
+    Insira o endereço de e-mail da pessoa que deseja convidar e selecione a função dela (Admin ou Member).
+  </Step>
+  <Step title="Aguarde a aceitação">
+    A pessoa convidada recebe um e-mail com um link para ingressar na sua organização. Convites pendentes ficam visíveis nas configurações.
+  </Step>
+</Steps>
+
+<Note>
+  Apenas **Admins** podem convidar novos membros.
+</Note>
+
+## Gerenciando membros
+
+### Visualizando membros
+
+A tabela de membros exibe:
+- **Nome** e **e-mail**
+- **Função** (Admin ou Member)
+- **Data de ingresso**
+- **Status** (ativo ou pendente)
+
+### Alterando funções
+
+Admins podem alterar a função de um membro:
+1. Encontre o membro na tabela de membros
+2. Clique no menu suspenso de função
+3. Selecione a nova função
+
+### Removendo membros
+
+Admins podem remover membros da organização:
+1. Encontre o membro na tabela de membros
+2. Clique no botão de remover
+3. Confirme a remoção
+
+<Warning>
+  Remover um membro revoga imediatamente o acesso dele a todos os projetos e dados da organização.
+</Warning>
+
+## Convites pendentes
+
+Visualize e gerencie convites pendentes:
+- Veja quem foi convidado e quando
+- Reenvie e-mails de convite
+- Cancele convites pendentes
+
+## Limites do plano
+
+O número de membros da equipe depende do seu plano:
+
+| Plano | Máximo de Membros |
+|-------|-------------------|
+| Starter | 3 |
+| Team | 5 |
+| Growth | Ilimitado |
+| Enterprise | Ilimitado |
+
+Quando você atingir o limite de membros, será necessário fazer upgrade do seu plano ou remover membros existentes antes de convidar novos.

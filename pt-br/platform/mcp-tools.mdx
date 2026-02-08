@@ -1,0 +1,173 @@
+---
+title: "MCP Tools"
+description: "Crie funções SQL parametrizadas que agentes de IA podem chamar"
+---
+
+## Visão Geral
+
+**MCP Tools** são o bloco de construção principal do Surf Data. Elas definem funções chamáveis que agentes de IA podem descobrir e executar via Model Context Protocol. Cada tool encapsula uma consulta SQL parametrizada e a expõe como uma função estruturada.
+
+## Criando uma tool
+
+<Steps>
+  <Step title="Selecione uma view">
+    Toda tool deve estar vinculada a uma [Agent View](/pt-br/platform/agent-views). Selecione ou crie uma view primeiro.
+  </Step>
+  <Step title="Crie uma nova tool">
+    Clique em **New Tool** na seção de tools da barra lateral esquerda.
+  </Step>
+  <Step title="Defina a tool">
+    Preencha a configuração da tool:
+
+    | Campo | Obrigatório | Descrição |
+    |-------|----------|-------------|
+    | Name | Sim | Nome da função que os agentes chamam (ex: `get_customer_by_id`) |
+    | Description | Sim | Explicação legível do que a tool faz |
+    | SQL Query | Sim | Template SQL parametrizado |
+    | View | Sim | Agent View vinculada |
+    | Datasource | Não | Override de datasource (padrão é a datasource da view) |
+  </Step>
+  <Step title="Adicione parâmetros">
+    Defina parâmetros de entrada usando a sintaxe `{parameter_name}` na sua consulta SQL:
+
+    ```sql
+    SELECT id, name, email, plan
+    FROM customers
+    WHERE id = {customer_id}
+    ```
+
+    Em seguida, adicione a definição do parâmetro:
+
+    | Propriedade | Descrição |
+    |----------|-------------|
+    | Name | Nome do parâmetro correspondente ao `{placeholder}` |
+    | Type | `string`, `number`, `boolean` ou `date` |
+    | Required | Se o parâmetro deve ser fornecido obrigatoriamente |
+    | Description | Explicação para o agente de IA |
+  </Step>
+  <Step title="Teste a tool">
+    Adicione valores de teste para cada parâmetro e clique em **Test Run**. O painel de resultados mostra:
+    - A consulta SQL substituída
+    - Linhas retornadas
+    - Tempo de execução
+    - Mensagens de erro (se houver)
+  </Step>
+  <Step title="Salvar">
+    Clique em **Save** para armazenar a configuração da tool.
+  </Step>
+</Steps>
+
+## Sintaxe de parâmetros
+
+O Surf Data usa a sintaxe `{parameter_name}` para parametrização de consultas. Os parâmetros são substituídos com segurança usando escape SQL para prevenir injeção.
+
+### Exemplos
+
+**Parâmetro único:**
+```sql
+SELECT * FROM customers WHERE id = {customer_id}
+```
+
+**Múltiplos parâmetros:**
+```sql
+SELECT * FROM orders
+WHERE customer_id = {customer_id}
+  AND status = {order_status}
+  AND created_at >= {start_date}
+```
+
+**Padrões LIKE:**
+```sql
+SELECT * FROM customers
+WHERE name LIKE '%' || {search_term} || '%'
+```
+
+### Tipos de parâmetros suportados
+
+| Tipo | Descrição | Valor de exemplo |
+|------|-------------|---------------|
+| `string` | Valor de texto, automaticamente entre aspas | `"john@example.com"` |
+| `number` | Valor numérico, sem aspas | `42` |
+| `boolean` | Verdadeiro ou falso | `true` |
+| `date` | String de data ou datetime | `"2024-01-15"` |
+
+## Políticas de segurança
+
+Tools suportam **políticas de segurança** opcionais para mascaramento de dados:
+
+1. Ative **Policy Enabled** na configuração da tool
+2. Escreva o código da política que transforma os resultados da consulta
+3. Casos de uso comuns:
+   - Mascarar endereços de email (`john@example.com` -> `j***@example.com`)
+   - Ocultar números de telefone
+   - Truncar campos sensíveis
+
+Consulte [Mascaramento de Dados](/pt-br/security/data-masking) para configuração detalhada de políticas.
+
+## Schema JSON da tool
+
+Quando agentes chamam `tools/list`, cada tool é retornada como um JSON schema:
+
+```json
+{
+  "name": "get_customer_by_id",
+  "description": "Retrieves customer details by their ID",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "customer_id": {
+        "type": "string",
+        "description": "The unique customer identifier"
+      }
+    },
+    "required": ["customer_id"]
+  }
+}
+```
+
+Você pode visualizar este schema no editor da tool alternando para a aba **JSON View**.
+
+## Segurança de consultas
+
+O Surf Data aplica regras rigorosas de segurança de consultas. Os seguintes padrões SQL são **bloqueados**:
+
+| Padrão | Exemplo |
+|---------|---------|
+| `DROP` | `DROP TABLE customers` |
+| `TRUNCATE` | `TRUNCATE TABLE orders` |
+| `DELETE` | `DELETE FROM customers` |
+| `UPDATE` | `UPDATE customers SET ...` |
+| `INSERT` | `INSERT INTO customers ...` |
+| `ALTER` | `ALTER TABLE customers ...` |
+| `CREATE` | `CREATE TABLE ...` |
+| `GRANT` | `GRANT SELECT ON ...` |
+| `REVOKE` | `REVOKE SELECT ON ...` |
+
+Além disso, todas as consultas SELECT recebem automaticamente um `LIMIT 100` caso nenhum limite seja especificado, garantindo conjuntos de resultados limitados.
+
+## Boas práticas
+
+<AccordionGroup>
+  <Accordion title="Use nomes descritivos para tools">
+    Nomeie tools como ações com verbos claros: `get_customer_by_id`, `search_orders_by_date`, `list_active_subscriptions`.
+  </Accordion>
+
+  <Accordion title="Escreva descrições detalhadas">
+    Os agentes usam a descrição para decidir quando chamar uma tool. Seja específico sobre o que ela retorna, entradas esperadas e quaisquer limitações.
+
+    **Bom:** "Recupera detalhes do cliente incluindo nome, email e plano de assinatura pelo ID único. Retorna uma única linha ou resultado vazio."
+
+    **Ruim:** "Busca um cliente"
+  </Accordion>
+
+  <Accordion title="Marque parâmetros obrigatórios">
+    Sempre marque parâmetros essenciais como obrigatórios. Parâmetros opcionais devem ter valores padrão sensíveis no seu SQL (ex: usando `COALESCE`).
+  </Accordion>
+
+  <Accordion title="Teste antes de publicar">
+    Sempre teste sua tool com valores de parâmetros realistas antes de publicar. Verifique:
+    - Resultados corretos
+    - Tempos de execução razoáveis
+    - Tratamento adequado de erros para casos extremos
+  </Accordion>
+</AccordionGroup>

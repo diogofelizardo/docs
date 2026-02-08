@@ -1,0 +1,151 @@
+---
+title: "Billing & Plans"
+description: "Pricing plans, billing management, and subscription details"
+---
+
+## Overview
+
+Surf Data offers four pricing plans designed for different team sizes and use cases. All plans are billed monthly in **BRL (Brazilian Real)** and include a **14-day free trial**.
+
+## Plans comparison
+
+| Feature | Starter | Team | Growth | Enterprise |
+|---------|---------|------|--------|------------|
+| **Price** | R$99/month | R$199/month | R$499/month | Custom |
+| **Executions/month** | 5,000 | 10,000 | 25,000 | Unlimited |
+| **Team members** | 3 | 5 | Unlimited | Unlimited |
+| **Datasources** | 1 | 3 | 5 | Unlimited |
+| **Views & tools** | Unlimited | Unlimited | Unlimited | Unlimited |
+| **AI tool creation** | Yes | Yes | Yes | Yes |
+| **Cross-DB joins** | Yes | Yes | Yes | Yes |
+| **Project organization** | — | Yes | Yes | Yes |
+| **RBAC** | — | Yes | Yes | Yes |
+| **Email support** | — | Yes | Yes | Yes |
+| **Evals dashboard** | — | — | Yes | Yes |
+| **Audit logs** | — | — | Yes | Yes |
+| **SSO/SAML** | — | — | Yes | Yes |
+| **Priority support** | — | — | Yes | Yes |
+| **Private cloud/On-prem** | — | — | — | Yes |
+| **Custom SLAs** | — | — | — | Yes |
+| **Advanced compliance** | — | — | — | Yes |
+| **Dedicated support** | — | — | — | Yes |
+
+## Plan details
+
+<Tabs>
+  <Tab title="Starter">
+    **R$99/month** — Best for individual developers and small projects.
+
+    - 5,000 tool executions per month
+    - Up to 3 team members
+    - 1 datasource connection
+    - Unlimited views and tools
+    - AI-assisted tool creation
+    - Cross-database joins
+  </Tab>
+  <Tab title="Team">
+    **R$199/month** — Best for small teams with multiple data sources.
+
+    Everything in Starter, plus:
+    - 10,000 tool executions per month
+    - Up to 5 team members
+    - Up to 3 datasource connections
+    - Project organization
+    - Role-based access control (RBAC)
+    - Email support
+  </Tab>
+  <Tab title="Growth">
+    **R$499/month** — Best for growing teams with advanced needs.
+
+    Everything in Team, plus:
+    - 25,000 tool executions per month
+    - Unlimited team members
+    - Up to 5 datasource connections
+    - Evaluations dashboard
+    - Full audit logs
+    - SSO/SAML authentication
+    - Priority support
+  </Tab>
+  <Tab title="Enterprise">
+    **Custom pricing** — For large organizations with compliance requirements.
+
+    Everything in Growth, plus:
+    - Unlimited executions
+    - Unlimited datasources
+    - Private cloud or on-premise deployment
+    - Custom SLAs
+    - Advanced compliance features
+    - Dedicated account manager
+    - Custom integrations
+
+    [Contact sales](mailto:sales@surfdata.com.br) for pricing.
+  </Tab>
+</Tabs>
+
+## Managing your subscription
+
+### Upgrading
+
+1. Go to **Settings** → **Billing**
+2. Click **Upgrade Plan**
+3. Select your new plan
+4. Confirm the change
+
+Upgrades take effect immediately. You'll be billed a prorated amount for the remainder of the current billing period.
+
+### Downgrading
+
+1. Go to **Settings** → **Billing**
+2. Click **Change Plan**
+3. Select the lower plan
+4. Confirm the change
+
+<Warning>
+  Downgrading may cause you to exceed the new plan's limits. Review your current usage before downgrading:
+  - **Datasources**: Excess datasources won't be deleted but cannot be edited until you're under the limit
+  - **Members**: Excess members won't be removed but you cannot invite new ones
+  - **Executions**: If you've exceeded the new plan's monthly limit, tool executions will be blocked until the next billing cycle
+</Warning>
+
+### Cancellation
+
+To cancel your subscription:
+1. Go to **Settings** → **Billing**
+2. Click **Cancel Subscription**
+3. Confirm cancellation
+
+Your account remains active until the end of the current billing period. After that, your projects become read-only and MCP endpoints stop accepting requests.
+
+## Payment methods
+
+Surf Data uses **Stripe** for payment processing. We accept:
+- Credit cards (Visa, Mastercard, Amex)
+- Debit cards
+- Boleto bancário (for annual plans)
+
+### Invoices
+
+Access your invoices from **Settings** → **Billing**. Invoices are generated monthly and include:
+- Plan charges
+- Usage details
+- Payment method used
+- Tax information
+
+## Free trial
+
+All plans include a **14-day free trial**. During the trial:
+- Full access to all features of your selected plan
+- Credit card is required at sign-up
+- Cancel anytime during the trial with no charge
+- Automatic billing starts after 14 days if not cancelled
+
+## Usage-based limits
+
+Execution limits reset at the beginning of each billing cycle. Track your usage in the [Consumption Dashboard](/en/monitoring/consumption).
+
+When you approach your limit:
+- **80% threshold** — warning notification
+- **90% threshold** — critical notification
+- **100% limit** — tool executions are blocked
+
+See [Alerts](/en/monitoring/alerts) for notification configuration.

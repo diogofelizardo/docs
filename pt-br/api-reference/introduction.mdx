@@ -1,0 +1,94 @@
+---
+title: "Referência da API"
+description: "Documentação completa da API REST do Surf Data"
+---
+
+## Visão geral
+
+A API REST do Surf Data permite que você gerencie programaticamente projetos, datasources, tools e tokens. Todos os endpoints são autenticados usando tokens de sessão do Clerk.
+
+## URL base
+
+```
+https://surfdata.com.br/api
+```
+
+## Autenticação
+
+Todas as requisições à API requerem autenticação via cookies de sessão do Clerk. Ao fazer requisições pelo navegador (dashboard), a autenticação é tratada automaticamente. Para acesso programático, inclua o token de sessão nos headers da requisição.
+
+```bash
+curl https://surfdata.com.br/api/projects \
+  -H "Cookie: __session=your-clerk-session-token"
+```
+
+<Note>
+  A API REST foi projetada para uso com o dashboard do Surf Data e sessões autenticadas. Para comunicação entre agentes e bancos de dados, use o [endpoint MCP](/pt-br/api-reference/mcp-endpoint) com Bearer tokens.
+</Note>
+
+## Formato de resposta
+
+Todas as respostas utilizam formato JSON.
+
+### Resposta de sucesso
+
+```json
+{
+  "data": { ... }
+}
+```
+
+### Resposta de erro
+
+```json
+{
+  "error": "Error message describing what went wrong"
+}
+```
+
+### Códigos de status HTTP
+
+| Código | Descrição |
+|--------|-----------|
+| `200` | Sucesso |
+| `201` | Criado |
+| `400` | Requisição inválida — parâmetros inválidos |
+| `401` | Não autorizado — autenticação ausente ou inválida |
+| `403` | Proibido — permissões insuficientes |
+| `404` | Não encontrado — recurso não existe |
+| `409` | Conflito — limite de recursos atingido |
+| `500` | Erro interno do servidor |
+
+## Seções da API
+
+<CardGroup cols={2}>
+  <Card title="Autenticação" icon="key" href="/pt-br/api-reference/authentication">
+    Gerenciamento de sessões e detalhes de autenticação da API.
+  </Card>
+  <Card title="Projetos" icon="folder" href="/pt-br/api-reference/projects">
+    Criar, listar, atualizar e excluir projetos.
+  </Card>
+  <Card title="Datasources" icon="database" href="/pt-br/api-reference/datasources">
+    Gerenciar conexões de banco de dados.
+  </Card>
+  <Card title="Tools" icon="wrench" href="/pt-br/api-reference/tools">
+    Criar e gerenciar MCP Tools.
+  </Card>
+  <Card title="Tokens" icon="key" href="/pt-br/api-reference/tokens">
+    Gerar e gerenciar tokens de acesso MCP.
+  </Card>
+  <Card title="Publicação" icon="rocket" href="/pt-br/api-reference/publishing">
+    Publicar e despublicar projetos.
+  </Card>
+  <Card title="Endpoint MCP" icon="plug" href="/pt-br/api-reference/mcp-endpoint">
+    O endpoint do protocolo MCP via JSON-RPC 2.0.
+  </Card>
+</CardGroup>
+
+## Limites de taxa
+
+A API REST atualmente não impõe limites de taxa além dos limites de execução do seu plano para invocações de tools. No entanto, recomendamos:
+
+- Evitar polling de endpoints mais de uma vez por segundo
+- Usar webhooks para atualizações em tempo real quando disponível
+- Cachear respostas quando apropriado

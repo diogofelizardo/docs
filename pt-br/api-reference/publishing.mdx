@@ -1,0 +1,104 @@
+---
+title: "API de Publicação"
+description: "Publique e despublique projetos para expor tools via MCP"
+---
+
+## Obter status de publicação
+
+Retorna o status de publicação atual de um projeto.
+
+```
+GET /api/projects/{projectId}/publish
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Resposta
+
+```json
+{
+  "isPublished": true,
+  "toolCount": 5,
+  "activeTokenCount": 2
+}
+```
+
+<ResponseField name="isPublished" type="boolean" required>
+  Se o projeto está atualmente publicado.
+</ResponseField>
+
+<ResponseField name="toolCount" type="number" required>
+  Número de MCP tools no projeto.
+</ResponseField>
+
+<ResponseField name="activeTokenCount" type="number" required>
+  Número de tokens de acesso ativos.
+</ResponseField>
+
+---
+
+## Publicar projeto
+
+Publica um projeto, tornando suas tools disponíveis via o endpoint MCP.
+
+```
+POST /api/projects/{projectId}/publish
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Requisitos
+
+- O projeto deve ter **pelo menos uma MCP tool**
+
+### Resposta
+
+```json
+{
+  "success": true,
+  "isPublished": true
+}
+```
+
+### Erros
+
+| Status | Erro | Causa |
+|--------|------|-------|
+| `400` | Nenhuma tool encontrada | O projeto não possui MCP tools |
+
+---
+
+## Despublicar projeto
+
+Despublica um projeto e desativa todos os seus tokens.
+
+```
+DELETE /api/projects/{projectId}/publish
+```
+
+<ParamField path="projectId" type="string" required>
+  O ID do projeto.
+</ParamField>
+
+### Processo
+
+Esta é uma operação transacional que:
+1. Define `isPublished` como `false`
+2. Marca todos os tokens do projeto como inativos (`isActive = false`)
+
+### Resposta
+
+```json
+{
+  "success": true,
+  "isPublished": false
+}
+```
+
+<Warning>
+  Despublicar desativa imediatamente todos os tokens. Os agentes receberão erros de autenticação. Você pode republicar posteriormente, mas precisará gerar novos tokens ou reativar os existentes.
+</Warning>

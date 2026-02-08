@@ -1,0 +1,122 @@
+---
+title: "Datasources"
+description: "Conecte seus bancos de dados ao Surf Data com segurança"
+---
+
+## Visão Geral
+
+Uma **Datasource** é uma conexão com um banco de dados externo. O Surf Data suporta PostgreSQL, MySQL e um banco de dados Demo integrado para testes.
+
+## Bancos de dados suportados
+
+<CardGroup cols={3}>
+  <Card title="PostgreSQL" icon="database">
+    Suporte completo com SSL, strings de conexão e navegação de schemas.
+  </Card>
+  <Card title="MySQL" icon="database">
+    Suporte completo com strings de conexão e navegação de tabelas.
+  </Card>
+  <Card title="Demo" icon="flask">
+    Banco de dados de exemplo pré-configurado para testes — sem necessidade de credenciais.
+  </Card>
+</CardGroup>
+
+## Adicionando uma datasource
+
+<Steps>
+  <Step title="Abra seu projeto">
+    Navegue até seu projeto a partir do Dashboard.
+  </Step>
+  <Step title="Clique em Add Datasource">
+    Na barra lateral esquerda, clique no botão **+** ao lado de Datasources.
+  </Step>
+  <Step title="Escolha o tipo de banco de dados">
+    Selecione **PostgreSQL**, **MySQL** ou **Demo**.
+  </Step>
+  <Step title="Insira os detalhes da conexão">
+    Você pode conectar usando uma **URL de conexão** ou **campos manuais**.
+
+    <Tabs>
+      <Tab title="URL de conexão">
+        Cole sua string de conexão completa:
+
+        ```
+        postgresql://user:password@host:5432/database?sslmode=require
+        ```
+
+        ```
+        mysql://user:password@host:3306/database
+        ```
+      </Tab>
+      <Tab title="Campos manuais">
+        Preencha os campos individuais:
+
+        | Campo | Obrigatório | Descrição |
+        |-------|----------|-------------|
+        | Host | Sim | Hostname do servidor de banco de dados |
+        | Port | Não | Padrão: 5432 (PG) ou 3306 (MySQL) |
+        | Database | Sim | Nome do banco de dados |
+        | Username | Sim | Usuário do banco de dados |
+        | Password | Sim | Senha do usuário |
+        | SSL | Não | Habilitar SSL (apenas PostgreSQL) |
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Teste a conexão">
+    Clique em **Test Connection** para verificar a conectividade. Você verá:
+    - Mensagem de sucesso com o número de tabelas encontradas
+    - Ou uma mensagem de erro com detalhes sobre a falha
+  </Step>
+  <Step title="Salvar">
+    Clique em **Connect** para criar a datasource. As credenciais são criptografadas antes do armazenamento.
+  </Step>
+</Steps>
+
+## Segurança da conexão
+
+Todas as credenciais de datasource são **criptografadas em repouso** usando criptografia AES. As credenciais brutas:
+
+- Nunca são armazenadas em texto simples
+- Nunca são retornadas ao cliente após a criação
+- São descriptografadas apenas em tempo de execução ao executar consultas
+- São transmitidas por conexões criptografadas (SSL/TLS)
+
+<Note>
+  Recomendamos fortemente o uso de **usuários de banco de dados somente leitura**. Embora o Surf Data bloqueie consultas destrutivas no nível da aplicação, um usuário somente leitura fornece defesa em profundidade.
+</Note>
+
+## Navegando pelas tabelas
+
+Uma vez conectado, você pode navegar pelas tabelas e colunas disponíveis na sua datasource:
+
+1. Selecione a datasource na barra lateral esquerda
+2. O navegador de tabelas mostra todas as tabelas e views disponíveis
+3. Clique em uma tabela para ver suas colunas com os tipos
+4. Use essas informações para escrever suas Agent Views e consultas de Tools
+
+## Editando uma datasource
+
+Você pode atualizar o nome e a configuração de conexão de uma datasource a qualquer momento:
+
+1. Selecione a datasource na barra lateral esquerda
+2. Clique no ícone de configurações
+3. Atualize os campos
+4. Teste a conexão
+5. Salve as alterações
+
+## Excluindo uma datasource
+
+<Warning>
+  Excluir uma datasource também remove todas as Agent Views e MCP Tools vinculadas a ela. Certifique-se de atualizar ou recriá-las em outra datasource, se necessário.
+</Warning>
+
+## Limites do plano
+
+O número de datasources por organização depende do seu plano:
+
+| Plano | Max Datasources |
+|------|----------------|
+| Starter | 1 |
+| Team | 3 |
+| Growth | 5 |
+| Enterprise | Ilimitado |

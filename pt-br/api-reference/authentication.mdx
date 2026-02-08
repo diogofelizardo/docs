@@ -1,0 +1,89 @@
+---
+title: "Autenticação"
+description: "Métodos de autenticação da API e gerenciamento de sessões"
+---
+
+## Visão geral
+
+O Surf Data utiliza dois mecanismos de autenticação:
+
+1. **Sessões Clerk** — para a API REST (acesso via dashboard e programático)
+2. **Bearer tokens** — para o endpoint MCP (acesso de agentes de IA)
+
+## Autenticação da API REST
+
+A API REST utiliza o [Clerk](https://clerk.com) para gerenciamento de sessões. A autenticação é tratada automaticamente ao usar o dashboard.
+
+### Autenticação baseada em sessão
+
+Todos os endpoints da API REST requerem uma sessão válida do Clerk. A sessão é fornecida como um cookie:
+
+```
+Cookie: __session=<clerk-session-token>
+```
+
+### Contexto necessário
+
+A maioria dos endpoints também requer:
+- **userId** — o ID do usuário autenticado
+- **orgId** — o ID da organização ativa
+
+Estes são extraídos automaticamente da sessão do Clerk.
+
+### Exemplo
+
+```bash
+curl -X GET https://surfdata.com.br/api/projects \
+  -H "Cookie: __session=your-clerk-session-token" \
+  -H "Content-Type: application/json"
+```
+
+## Autenticação do endpoint MCP
+
+O endpoint MCP (`/mcp/http`) utiliza autenticação via **Bearer token**.
+
+### Formato
+
+```
+Authorization: Bearer sk_live_<your-token>
+```
+
+### Validação do token
+
+Em cada requisição, o endpoint:
+
+1. Extrai o token do header `Authorization`
+2. Calcula o hash SHA-256
+3. Busca o hash do token no banco de dados
+4. Verifica se o token está ativo
+5. Verifica a data de expiração
+6. Confirma que o projeto vinculado está publicado
+
+### Respostas de erro
+
+| Status | Erro | Causa |
+|--------|------|-------|
+| `401` | Missing authorization header | Nenhum header `Authorization` fornecido |
+| `401` | Invalid token format | Token não corresponde ao formato esperado |
+| `401` | Token not found | Hash do token não encontrado no banco de dados |
+| `401` | Token is inactive | Token foi desativado |
+| `401` | Token has expired | A data de expiração do token já passou |
+| `403` | Project not published | O projeto vinculado não está publicado |
+
+## Escopo por organização
+
+Todas as operações da API REST são escopadas à organização ativa do usuário autenticado. Isso significa:
+
+- Usuários só podem acessar projetos pertencentes à sua organização
+- Datasources, tools e tokens são acessíveis apenas dentro da organização do seu projeto
+- Operações exclusivas de administradores (faturamento, gerenciamento de membros) requerem a role `ADMIN`
+
+### Verificação de roles
+
+| Endpoint | Role necessária |
+|----------|----------------|
+| GET /api/projects | Qualquer membro |
+| POST /api/projects | Qualquer membro |
+| GET /api/organizations/billing | Admin |
+| POST /api/organizations/members/invite | Admin |
+| PUT /api/organizations/settings | Admin |
