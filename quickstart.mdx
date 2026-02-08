@@ -1,80 +1,171 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Connect your database to AI agents in under 5 minutes"
 ---
 
-## Get started in three steps
+## Prerequisites
 
-Get your documentation site running locally and make your first customization.
+- A Surf Data account ([sign up here](https://app.surfdata.io/sign-up))
+- Access to a PostgreSQL or MySQL database
+- An AI agent that supports MCP (Claude, Cursor, etc.)
 
-### Step 1: Set up your local environment
+## Step-by-step guide
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+<Steps>
+  <Step title="Create your organization">
+    After signing up, you'll be guided through creating your organization. This is where your team, projects, and billing are managed.
 
-### Step 2: Deploy your changes
+    Choose a plan that fits your needs:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    | Plan | Executions/month | Datasources |
+    |------|-----------------|-------------|
+    | Starter (R$99) | 5,000 | 1 |
+    | Team (R$199) | 10,000 | 3 |
+    | Growth (R$499) | 25,000 | 5 |
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    All plans include a **14-day free trial**.
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Create a project">
+    Navigate to the **Dashboard** and click **New Project**. Give it a name and description.
 
-### Step 3: Go live
+    A project groups your datasources, views, and MCP tools together. Think of it as a workspace for a specific use case (e.g., "Customer Support Agent" or "Sales Analytics").
+  </Step>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+  <Step title="Add a datasource">
+    Inside your project, click **Add Datasource** and choose your database type:
+
+    <Tabs>
+      <Tab title="PostgreSQL">
+        Enter your connection details:
+        ```
+        Host: your-db-host.com
+        Port: 5432
+        Database: mydb
+        Username: readonly_user
+        Password: ********
+        SSL: Enabled
+        ```
+        Or use a connection string:
+        ```
+        postgresql://readonly_user:password@your-db-host.com:5432/mydb?sslmode=require
+        ```
+      </Tab>
+      <Tab title="MySQL">
+        Enter your connection details:
+        ```
+        Host: your-db-host.com
+        Port: 3306
+        Database: mydb
+        Username: readonly_user
+        Password: ********
+        ```
+        Or use a connection string:
+        ```
+        mysql://readonly_user:password@your-db-host.com:3306/mydb
+        ```
+      </Tab>
+      <Tab title="Demo">
+        Select **Demo** to use a pre-configured sample database. No credentials needed — perfect for testing.
+      </Tab>
+    </Tabs>
+
+    Click **Test Connection** to verify, then **Connect** to save.
+  </Step>
+
+  <Step title="Create an Agent View">
+    An Agent View is a saved SQL query that defines what data is available. Click **New View** and write your query:
+
+    ```sql
+    SELECT id, name, email, created_at
+    FROM customers
+    WHERE status = 'active'
+    ```
+
+    Give it a descriptive name like `active_customers`.
+  </Step>
+
+  <Step title="Create an MCP Tool">
+    Tools are the functions that AI agents can call. Create a tool linked to your view:
+
+    - **Name**: `get_customer_by_id`
+    - **Description**: "Retrieves customer details by their ID"
+    - **SQL Query**:
+      ```sql
+      SELECT id, name, email, created_at
+      FROM customers
+      WHERE id = {customer_id}
+      ```
+    - **Parameters**: Add `customer_id` (type: string, required: true)
+
+    Click **Test Run** with a sample value to verify it works.
+  </Step>
+
+  <Step title="Publish your project">
+    Click the **Publish** button to make your tools available via MCP:
+
+    1. Select which tools to publish
+    2. Name your access token (e.g., "claude-integration")
+    3. Copy your **MCP endpoint URL** and **Bearer token**
+
+    <Warning>
+      Save your token immediately — it's only shown once and cannot be retrieved later.
+    </Warning>
+  </Step>
+
+  <Step title="Connect to your AI agent">
+    Use the MCP endpoint URL and token to connect your agent.
+
+    <Tabs>
+      <Tab title="Claude Desktop">
+        Add to your `claude_desktop_config.json`:
+        ```json
+        {
+          "mcpServers": {
+            "surf-data": {
+              "url": "https://app.surfdata.io/mcp/http",
+              "headers": {
+                "Authorization": "Bearer your-token-here"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+      <Tab title="Cursor">
+        Add to your `.cursor/mcp.json`:
+        ```json
+        {
+          "mcpServers": {
+            "surf-data": {
+              "url": "https://app.surfdata.io/mcp/http",
+              "headers": {
+                "Authorization": "Bearer your-token-here"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+    </Tabs>
+
+    Your agent now has access to the tools you published. Try asking it: *"Get the details for customer ID 123"*.
+  </Step>
+</Steps>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Learn the concepts" icon="lightbulb" href="/concepts">
+    Understand the data model and architecture.
+  </Card>
+  <Card title="Configure security" icon="shield-halved" href="/security/data-masking">
+    Set up PII masking and access policies.
+  </Card>
+  <Card title="Monitor usage" icon="chart-line" href="/monitoring/consumption">
+    Track executions and set up alerts.
+  </Card>
+  <Card title="Explore the API" icon="code" href="/api-reference/introduction">
+    Automate with the REST API.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

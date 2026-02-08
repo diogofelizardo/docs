@@ -1,0 +1,122 @@
+---
+title: "Datasources"
+description: "Connect your databases to Surf Data securely"
+---
+
+## Overview
+
+A **Datasource** is a connection to an external database. Surf Data supports PostgreSQL, MySQL, and a built-in Demo database for testing.
+
+## Supported databases
+
+<CardGroup cols={3}>
+  <Card title="PostgreSQL" icon="database">
+    Full support with SSL, connection strings, and schema browsing.
+  </Card>
+  <Card title="MySQL" icon="database">
+    Full support with connection strings and table browsing.
+  </Card>
+  <Card title="Demo" icon="flask">
+    Pre-configured sample database for testing — no credentials needed.
+  </Card>
+</CardGroup>
+
+## Adding a datasource
+
+<Steps>
+  <Step title="Open your project">
+    Navigate to your project from the Dashboard.
+  </Step>
+  <Step title="Click Add Datasource">
+    In the left sidebar, click the **+** button next to Datasources.
+  </Step>
+  <Step title="Choose database type">
+    Select **PostgreSQL**, **MySQL**, or **Demo**.
+  </Step>
+  <Step title="Enter connection details">
+    You can connect using a **connection URL** or **manual fields**.
+
+    <Tabs>
+      <Tab title="Connection URL">
+        Paste your full connection string:
+
+        ```
+        postgresql://user:password@host:5432/database?sslmode=require
+        ```
+
+        ```
+        mysql://user:password@host:3306/database
+        ```
+      </Tab>
+      <Tab title="Manual fields">
+        Fill in the individual fields:
+
+        | Field | Required | Description |
+        |-------|----------|-------------|
+        | Host | Yes | Database server hostname |
+        | Port | No | Default: 5432 (PG) or 3306 (MySQL) |
+        | Database | Yes | Database name |
+        | Username | Yes | Database user |
+        | Password | Yes | User password |
+        | SSL | No | Enable SSL (PostgreSQL only) |
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Test the connection">
+    Click **Test Connection** to verify connectivity. You'll see:
+    - Success message with the number of tables found
+    - Or an error message with details about the failure
+  </Step>
+  <Step title="Save">
+    Click **Connect** to create the datasource. Credentials are encrypted before storage.
+  </Step>
+</Steps>
+
+## Connection security
+
+All datasource credentials are **encrypted at rest** using AES encryption. The raw credentials are:
+
+- Never stored in plain text
+- Never returned to the client after creation
+- Decrypted only at runtime when executing queries
+- Transmitted over encrypted connections (SSL/TLS)
+
+<Note>
+  We strongly recommend using **read-only database users**. While Surf Data blocks destructive queries at the application level, a read-only user provides defense in depth.
+</Note>
+
+## Browsing tables
+
+Once connected, you can browse the tables and columns available in your datasource:
+
+1. Select the datasource in the left sidebar
+2. The table browser shows all available tables and views
+3. Click a table to see its columns with types
+4. Use this information to write your Agent Views and Tool queries
+
+## Editing a datasource
+
+You can update a datasource's name and connection configuration at any time:
+
+1. Select the datasource in the left sidebar
+2. Click the settings icon
+3. Update the fields
+4. Test the connection
+5. Save changes
+
+## Deleting a datasource
+
+<Warning>
+  Deleting a datasource also removes all Agent Views and MCP Tools linked to it. Make sure to update or recreate them on another datasource if needed.
+</Warning>
+
+## Plan limits
+
+The number of datasources per organization depends on your plan:
+
+| Plan | Max Datasources |
+|------|----------------|
+| Starter | 1 |
+| Team | 3 |
+| Growth | 5 |
+| Enterprise | Unlimited |

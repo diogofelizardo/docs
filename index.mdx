@@ -1,97 +1,108 @@
 ---
 title: "Introduction"
-description: "Welcome to the new home for your documentation"
+description: "The simplest, safest way to connect AI agents to your data stack"
 ---
 
-## Setting up
+## What is Surf Data?
 
-Get your documentation site up and running in minutes.
+Surf Data is a managed platform that lets you expose databases to AI agents via the **Model Context Protocol (MCP)** in minutes, not sprints.
+
+Instead of building and maintaining custom MCP servers, Surf Data provides a complete infrastructure for connecting **PostgreSQL** and **MySQL** databases to any AI agent — with built-in security, LGPD compliance, and PII masking.
 
 <Card
-  title="Start here"
+  title="Get started in 5 minutes"
   icon="rocket"
   href="/quickstart"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Follow our quickstart guide to connect your first database and publish an MCP endpoint.
 </Card>
 
-## Make it yours
+## How it works
 
-Design a docs site that looks great and empowers your users.
+<Steps>
+  <Step title="Connect your database">
+    Add your PostgreSQL or MySQL connection. Surf Data encrypts and securely stores your credentials.
+  </Step>
+  <Step title="Create SQL tools">
+    Write SQL queries as reusable tools with parameterized inputs. Define what data agents can access.
+  </Step>
+  <Step title="Configure security policies">
+    Enable PII masking and set data access policies to ensure LGPD compliance.
+  </Step>
+  <Step title="Publish and integrate">
+    Publish your project and get an MCP endpoint URL with a Bearer token. Connect it to Claude, Cursor, or any MCP-compatible agent.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
+## Explore the platform
+
+<CardGroup cols={2}>
   <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
+    title="Core concepts"
+    icon="lightbulb"
+    href="/concepts"
   >
-    Edit your docs locally and preview them in real time.
+    Understand projects, datasources, views, tools, and the MCP protocol.
   </Card>
   <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
+    title="Platform guide"
+    icon="database"
+    href="/platform/projects"
   >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+    Learn how to manage projects, datasources, and MCP tools.
   </Card>
   <Card
-    title="API documentation"
-    icon="terminal"
+    title="Security"
+    icon="shield-halved"
+    href="/security/authentication"
+  >
+    Authentication, data masking, LGPD compliance, and token management.
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
     href="/api-reference/introduction"
   >
-    Auto-generate API documentation from OpenAPI specifications.
+    Complete REST API documentation for programmatic access.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Integrations
 
-Everything you need to create world-class documentation.
+Connect Surf Data to your favorite AI tools.
 
-<Columns cols={2}>
+<CardGroup cols={3}>
   <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
+    title="Claude"
+    icon="message-bot"
+    href="/integrations/claude"
   >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+    Use with Claude Desktop or Claude Code.
   </Card>
   <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
+    title="Cursor"
+    icon="terminal"
+    href="/integrations/cursor"
   >
-    Display images and other media.
+    Connect to Cursor IDE as an MCP server.
   </Card>
   <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
+    title="Custom agents"
+    icon="robot"
+    href="/integrations/custom-agents"
   >
-    Write once and reuse across your docs.
+    Integrate with any MCP-compatible agent.
   </Card>
-</Columns>
+</CardGroup>
 
-## Need inspiration?
+## Why Surf Data?
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+| Surf Data | Building your own MCP |
+|-----------|----------------------|
+| Ready in minutes | Weeks of development |
+| LGPD compliance built-in | Must implement yourself |
+| PII masking included | Custom security layer needed |
+| Managed infrastructure | Self-hosted and maintained |
+| Usage monitoring & alerts | Build your own observability |
+| Pricing in BRL | USD-only alternatives |

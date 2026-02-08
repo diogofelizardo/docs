@@ -1,0 +1,221 @@
+---
+title: "Tools API"
+description: "Create and manage MCP tools within projects"
+---
+
+## List tools
+
+Returns all MCP tools for a project.
+
+```
+GET /api/projects/{projectId}/tools
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+### Response
+
+```json
+{
+  "tools": [
+    {
+      "id": "tool_abc123",
+      "name": "get_customer_by_id",
+      "description": "Retrieves customer details by their ID",
+      "query": "SELECT id, name, email FROM customers WHERE id = {customer_id}",
+      "parameters": [
+        {
+          "name": "customer_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique customer identifier"
+        }
+      ],
+      "arguments": [],
+      "testValues": [
+        {"name": "customer_id", "value": "12345"}
+      ],
+      "policyEnabled": false,
+      "policyCode": null,
+      "projectId": "clx1234567890",
+      "datasourceId": "ds_abc123",
+      "viewId": "view_xyz789",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-20T14:00:00Z"
+    }
+  ]
+}
+```
+
+<ResponseField name="tools" type="object[]" required>
+  Array of MCP tool objects.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Unique tool identifier</ResponseField>
+    <ResponseField name="name" type="string" required>Tool function name</ResponseField>
+    <ResponseField name="description" type="string" required>Human-readable description</ResponseField>
+    <ResponseField name="query" type="string" required>SQL query template with `{parameter}` placeholders</ResponseField>
+    <ResponseField name="parameters" type="object[]" required>
+      Parameter definitions.
+      <Expandable>
+        <ResponseField name="name" type="string" required>Parameter name</ResponseField>
+        <ResponseField name="type" type="string" required>Type: `string`, `number`, `boolean`, `date`</ResponseField>
+        <ResponseField name="required" type="boolean" required>Whether the parameter is required</ResponseField>
+        <ResponseField name="description" type="string">Description for the AI agent</ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="policyEnabled" type="boolean" required>Whether data masking is enabled</ResponseField>
+    <ResponseField name="policyCode" type="string">Masking policy code</ResponseField>
+    <ResponseField name="viewId" type="string" required>Linked Agent View ID</ResponseField>
+    <ResponseField name="datasourceId" type="string">Linked datasource ID</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Create tool
+
+Creates a new MCP tool in the project.
+
+```
+POST /api/projects/{projectId}/tools
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Tool function name. Use snake_case (e.g., `get_customer_by_id`).
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Description of what the tool does. Used by AI agents to decide when to call it.
+</ParamField>
+
+<ParamField body="query" type="string">
+  SQL query template with `{parameter}` placeholders.
+</ParamField>
+
+<ParamField body="viewId" type="string" required>
+  ID of the linked Agent View. Must belong to the same project.
+</ParamField>
+
+<ParamField body="datasourceId" type="string">
+  ID of the linked datasource. Must belong to the same project.
+</ParamField>
+
+<ParamField body="parameters" type="object[]">
+  Array of parameter definitions.
+  <Expandable>
+    <ParamField body="name" type="string" required>Parameter name matching `{placeholder}` in query</ParamField>
+    <ParamField body="type" type="string" required>One of: `string`, `number`, `boolean`, `date`</ParamField>
+    <ParamField body="required" type="boolean">Whether the parameter is required. Default: false</ParamField>
+    <ParamField body="description" type="string">Description for AI agents</ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="policyEnabled" type="boolean">
+  Enable data masking policy. Default: false.
+</ParamField>
+
+<ParamField body="policyCode" type="string">
+  JavaScript code for the masking policy.
+</ParamField>
+
+### Example
+
+```bash
+curl -X POST https://app.surfdata.io/api/projects/clx123/tools \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "search_customers_by_email",
+    "description": "Searches for customers matching an email pattern",
+    "query": "SELECT id, name, email FROM customers WHERE email LIKE {email_pattern}",
+    "viewId": "view_xyz789",
+    "datasourceId": "ds_abc123",
+    "parameters": [
+      {
+        "name": "email_pattern",
+        "type": "string",
+        "required": true,
+        "description": "Email pattern to search for"
+      }
+    ]
+  }'
+```
+
+---
+
+## Get tool
+
+Returns a single tool by ID.
+
+```
+GET /api/projects/{projectId}/tools/{toolId}
+```
+
+---
+
+## Update tool
+
+Updates a tool's configuration.
+
+```
+PUT /api/projects/{projectId}/tools/{toolId}
+```
+
+All fields are optional — only provided fields are updated.
+
+<ParamField body="name" type="string">New tool name</ParamField>
+<ParamField body="description" type="string">New description</ParamField>
+<ParamField body="query" type="string">New SQL query template</ParamField>
+<ParamField body="parameters" type="object[]">New parameter definitions</ParamField>
+<ParamField body="testValues" type="object[]">New test values</ParamField>
+<ParamField body="policyEnabled" type="boolean">Toggle data masking</ParamField>
+<ParamField body="policyCode" type="string">New masking policy code</ParamField>
+
+---
+
+## Delete tool
+
+Permanently deletes an MCP tool.
+
+```
+DELETE /api/projects/{projectId}/tools/{toolId}
+```
+
+---
+
+## Test tool
+
+Executes a tool with test parameters.
+
+```
+POST /api/projects/{projectId}/tools/{toolId}/test
+```
+
+<ParamField body="parameters" type="object" required>
+  Key-value pairs of parameter names and test values.
+</ParamField>
+
+<ParamField body="query" type="string">
+  Optional query override for testing.
+</ParamField>
+
+### Response
+
+```json
+{
+  "result": {
+    "columns": ["id", "name", "email"],
+    "rows": [
+      {"id": "12345", "name": "João Silva", "email": "joao@example.com"}
+    ],
+    "rowCount": 1,
+    "executionTime": 32
+  },
+  "substitutedQuery": "SELECT id, name, email FROM customers WHERE id = '12345'"
+}
+```

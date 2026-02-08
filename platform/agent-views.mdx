@@ -1,0 +1,129 @@
+---
+title: "Agent Views"
+description: "Define SQL queries that control what data AI agents can access"
+---
+
+## Overview
+
+An **Agent View** is a named SQL query that defines a dataset within a project. Views serve as the data foundation for MCP Tools — every tool must be linked to a view.
+
+Agent Views let you:
+- Pre-define safe, tested SQL queries
+- Control exactly which tables and columns are exposed
+- Reuse the same data definition across multiple tools
+
+## Creating a view
+
+<Steps>
+  <Step title="Select a datasource">
+    In your project editor, select the datasource you want to query from the left sidebar.
+  </Step>
+  <Step title="Create a new view">
+    Click **New View** or the **+** button in the views section.
+  </Step>
+  <Step title="Name your view">
+    Give it a descriptive name that reflects the data it returns:
+    - `active_customers`
+    - `recent_orders`
+    - `monthly_revenue`
+  </Step>
+  <Step title="Write your SQL query">
+    Use the built-in SQL editor to write your query. The editor provides:
+    - Syntax highlighting
+    - Table and column autocomplete
+    - Error detection
+
+    ```sql
+    SELECT
+      c.id,
+      c.name,
+      c.email,
+      c.plan,
+      c.created_at,
+      COUNT(o.id) as order_count
+    FROM customers c
+    LEFT JOIN orders o ON o.customer_id = c.id
+    WHERE c.status = 'active'
+    GROUP BY c.id, c.name, c.email, c.plan, c.created_at
+    ```
+  </Step>
+  <Step title="Save the view">
+    Click **Save** to store your view. It's now ready to be used by MCP Tools.
+  </Step>
+</Steps>
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Use SELECT with explicit columns">
+    Avoid `SELECT *`. List specific columns to control exactly what data is exposed and improve query performance.
+
+    ```sql
+    -- Good
+    SELECT id, name, email FROM customers
+
+    -- Avoid
+    SELECT * FROM customers
+    ```
+  </Accordion>
+
+  <Accordion title="Filter data appropriately">
+    Add WHERE clauses to limit the scope of data returned. Only expose what agents need.
+
+    ```sql
+    SELECT id, name, status
+    FROM customers
+    WHERE status = 'active'
+      AND deleted_at IS NULL
+    ```
+  </Accordion>
+
+  <Accordion title="Use JOINs for rich data">
+    Combine data from multiple tables to give agents more context in a single query.
+
+    ```sql
+    SELECT
+      o.id as order_id,
+      o.total,
+      c.name as customer_name,
+      p.name as product_name
+    FROM orders o
+    JOIN customers c ON c.id = o.customer_id
+    JOIN products p ON p.id = o.product_id
+    ```
+  </Accordion>
+
+  <Accordion title="Exclude sensitive columns">
+    Never include raw passwords, API keys, or other secrets in views. Use [data masking](/security/data-masking) for PII fields.
+
+    ```sql
+    -- Good: exclude sensitive data
+    SELECT id, name, email, plan FROM customers
+
+    -- Bad: exposes sensitive data
+    SELECT id, name, email, password_hash, api_key FROM customers
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Linking views to tools
+
+Every MCP Tool requires a linked Agent View. The view provides:
+
+1. **Context** — the tool "knows" what data is available
+2. **Governance** — views act as a governance layer for data access
+3. **Reusability** — one view can serve multiple tools
+
+For example, an `active_customers` view could be used by:
+- `get_customer_by_id` — lookup by ID
+- `search_customers` — search by name or email
+- `list_recent_customers` — list most recently created customers
+
+## Editing and deleting views
+
+- **Edit**: Select the view and modify its SQL query or name. Save to apply changes.
+- **Delete**: Removing a view also removes all MCP Tools linked to it.
+
+<Warning>
+  Editing a view's SQL query affects all tools linked to it. Test your changes before saving in production.
+</Warning>

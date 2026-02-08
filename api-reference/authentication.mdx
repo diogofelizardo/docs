@@ -1,0 +1,89 @@
+---
+title: "Authentication"
+description: "API authentication methods and session management"
+---
+
+## Overview
+
+Surf Data uses two authentication mechanisms:
+
+1. **Clerk sessions** — for the REST API (dashboard and programmatic access)
+2. **Bearer tokens** — for the MCP endpoint (AI agent access)
+
+## REST API authentication
+
+The REST API uses [Clerk](https://clerk.com) for session management. Authentication is handled automatically when using the dashboard.
+
+### Session-based auth
+
+All REST API endpoints require a valid Clerk session. The session is provided as a cookie:
+
+```
+Cookie: __session=<clerk-session-token>
+```
+
+### Required context
+
+Most endpoints also require:
+- **userId** — the authenticated user's ID
+- **orgId** — the active organization's ID
+
+These are extracted from the Clerk session automatically.
+
+### Example
+
+```bash
+curl -X GET https://app.surfdata.io/api/projects \
+  -H "Cookie: __session=your-clerk-session-token" \
+  -H "Content-Type: application/json"
+```
+
+## MCP endpoint authentication
+
+The MCP endpoint (`/mcp/http`) uses **Bearer token** authentication.
+
+### Format
+
+```
+Authorization: Bearer sk_live_<your-token>
+```
+
+### Token validation
+
+On each request, the endpoint:
+
+1. Extracts the token from the `Authorization` header
+2. Computes the SHA-256 hash
+3. Looks up the token hash in the database
+4. Verifies the token is active
+5. Checks expiration date
+6. Confirms the linked project is published
+
+### Error responses
+
+| Status | Error | Cause |
+|--------|-------|-------|
+| `401` | Missing authorization header | No `Authorization` header provided |
+| `401` | Invalid token format | Token doesn't match expected format |
+| `401` | Token not found | Token hash not in database |
+| `401` | Token is inactive | Token has been deactivated |
+| `401` | Token has expired | Token's expiration date has passed |
+| `403` | Project not published | The linked project is not published |
+
+## Organization scoping
+
+All REST API operations are scoped to the authenticated user's active organization. This means:
+
+- Users can only access projects belonging to their organization
+- Datasources, tools, and tokens are accessible only within their project's organization
+- Admin-only operations (billing, member management) require the `ADMIN` role
+
+### Role checks
+
+| Endpoint | Required Role |
+|----------|--------------|
+| GET /api/projects | Any member |
+| POST /api/projects | Any member |
+| GET /api/organizations/billing | Admin |
+| POST /api/organizations/members/invite | Admin |
+| PUT /api/organizations/settings | Admin |

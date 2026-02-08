@@ -1,0 +1,104 @@
+---
+title: "Publishing API"
+description: "Publish and unpublish projects to expose tools via MCP"
+---
+
+## Get publish status
+
+Returns the current publish status of a project.
+
+```
+GET /api/projects/{projectId}/publish
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+### Response
+
+```json
+{
+  "isPublished": true,
+  "toolCount": 5,
+  "activeTokenCount": 2
+}
+```
+
+<ResponseField name="isPublished" type="boolean" required>
+  Whether the project is currently published.
+</ResponseField>
+
+<ResponseField name="toolCount" type="number" required>
+  Number of MCP tools in the project.
+</ResponseField>
+
+<ResponseField name="activeTokenCount" type="number" required>
+  Number of active access tokens.
+</ResponseField>
+
+---
+
+## Publish project
+
+Publishes a project, making its tools available via the MCP endpoint.
+
+```
+POST /api/projects/{projectId}/publish
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+### Requirements
+
+- The project must have **at least one MCP tool**
+
+### Response
+
+```json
+{
+  "success": true,
+  "isPublished": true
+}
+```
+
+### Errors
+
+| Status | Error | Cause |
+|--------|-------|-------|
+| `400` | No tools found | Project has no MCP tools |
+
+---
+
+## Unpublish project
+
+Unpublishes a project and deactivates all its tokens.
+
+```
+DELETE /api/projects/{projectId}/publish
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+### Process
+
+This is a transactional operation that:
+1. Sets `isPublished` to `false`
+2. Marks all project tokens as inactive (`isActive = false`)
+
+### Response
+
+```json
+{
+  "success": true,
+  "isPublished": false
+}
+```
+
+<Warning>
+  Unpublishing immediately deactivates all tokens. Agents will receive authentication errors. You can republish later, but you'll need to generate new tokens or reactivate existing ones.
+</Warning>

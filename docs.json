@@ -1,68 +1,90 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Surf Data",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0EA5E9",
+    "light": "#38BDF8",
+    "dark": "#0284C7"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
               "index",
               "quickstart",
-              "development"
+              "concepts"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Platform",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "platform/projects",
+              "platform/datasources",
+              "platform/agent-views",
+              "platform/mcp-tools",
+              "platform/publishing"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Security",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "security/authentication",
+              "security/data-masking",
+              "security/lgpd",
+              "security/tokens"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Organizations",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "organizations/setup",
+              "organizations/members",
+              "organizations/billing"
+            ]
+          },
+          {
+            "group": "Monitoring",
+            "pages": [
+              "monitoring/consumption",
+              "monitoring/evals",
+              "monitoring/alerts"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/claude",
+              "integrations/cursor",
+              "integrations/custom-agents"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/authentication"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Endpoints",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/projects",
+              "api-reference/datasources",
+              "api-reference/tools",
+              "api-reference/tokens",
+              "api-reference/publishing",
+              "api-reference/mcp-endpoint"
             ]
           }
         ]
@@ -71,14 +93,14 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Dashboard",
+          "href": "https://app.surfdata.io",
+          "icon": "gauge"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Status",
+          "href": "https://status.surfdata.io",
+          "icon": "signal"
         }
       ]
     }
@@ -91,32 +113,32 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@surfdata.io"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://app.surfdata.io"
     }
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/surfdata",
+      "github": "https://github.com/surfdata",
+      "linkedin": "https://linkedin.com/company/surfdata"
     }
   }
 }

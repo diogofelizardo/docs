@@ -1,0 +1,98 @@
+---
+title: "Members & Roles"
+description: "Manage team members and role-based access control"
+---
+
+## Overview
+
+Surf Data uses **role-based access control (RBAC)** to manage who can do what within your organization. Team members can be assigned one of two roles.
+
+## Roles
+
+| Role | Description |
+|------|-------------|
+| **Admin** | Full access to all organization settings, billing, member management, and projects |
+| **Member** | Access to projects and tools; cannot manage billing or organization settings |
+
+### Permission matrix
+
+| Action | Admin | Member |
+|--------|-------|--------|
+| Create/edit/delete projects | Yes | Yes |
+| Create/manage datasources | Yes | Yes |
+| Create/manage tools | Yes | Yes |
+| Publish projects | Yes | Yes |
+| View consumption metrics | Yes | Yes |
+| Manage organization settings | Yes | No |
+| Manage billing & plans | Yes | No |
+| Invite/remove members | Yes | No |
+| Change member roles | Yes | No |
+
+## Inviting members
+
+<Steps>
+  <Step title="Go to Settings">
+    Navigate to **Settings** from the sidebar.
+  </Step>
+  <Step title="Open the Members tab">
+    Click on the members section of the settings page.
+  </Step>
+  <Step title="Send an invitation">
+    Enter the email address of the person you want to invite and select their role (Admin or Member).
+  </Step>
+  <Step title="Wait for acceptance">
+    The invited person receives an email with a link to join your organization. Pending invitations are visible in the settings.
+  </Step>
+</Steps>
+
+<Note>
+  Only **Admins** can invite new members.
+</Note>
+
+## Managing members
+
+### Viewing members
+
+The members table shows:
+- **Name** and **email**
+- **Role** (Admin or Member)
+- **Joined date**
+- **Status** (active or pending)
+
+### Changing roles
+
+Admins can change a member's role:
+1. Find the member in the members table
+2. Click the role dropdown
+3. Select the new role
+
+### Removing members
+
+Admins can remove members from the organization:
+1. Find the member in the members table
+2. Click the remove button
+3. Confirm the removal
+
+<Warning>
+  Removing a member immediately revokes their access to all projects and data in the organization.
+</Warning>
+
+## Pending invitations
+
+View and manage pending invitations:
+- See who has been invited and when
+- Resend invitation emails
+- Cancel pending invitations
+
+## Plan limits
+
+The number of team members depends on your plan:
+
+| Plan | Max Members |
+|------|------------|
+| Starter | 3 |
+| Team | 5 |
+| Growth | Unlimited |
+| Enterprise | Unlimited |
+
+When you reach the member limit, you'll need to upgrade your plan or remove existing members before inviting new ones.

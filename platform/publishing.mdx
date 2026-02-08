@@ -1,0 +1,162 @@
+---
+title: "Publishing"
+description: "Make your tools available to AI agents via MCP"
+---
+
+## Overview
+
+**Publishing** is the process of making your project's MCP Tools accessible to AI agents. When you publish a project, Surf Data generates an MCP endpoint URL and Bearer token that agents use to discover and call your tools.
+
+## Publishing workflow
+
+<Steps>
+  <Step title="Open the Publish dialog">
+    Click the **Publish** button in your project editor. This opens a step-by-step wizard.
+  </Step>
+  <Step title="Select tools">
+    Choose which tools to make available. You can:
+    - Select individual tools
+    - Use **Select All** to include everything
+    - Review your selection before proceeding
+
+    Only selected tools will be discoverable via `tools/list`.
+  </Step>
+  <Step title="Configure token">
+    Name your access token (e.g., "claude-production", "n8n-integration"). The name helps you identify tokens later.
+
+    You'll see a preview of:
+    - The MCP endpoint URL
+    - Which tools will be published
+  </Step>
+  <Step title="Copy credentials">
+    After publishing, you'll receive:
+    - **MCP Endpoint URL**: `https://app.surfdata.io/mcp/http`
+    - **Bearer Token**: A unique access token
+
+    <Warning>
+      The Bearer token is shown **only once**. Copy it immediately and store it securely. If you lose it, you'll need to generate a new token.
+    </Warning>
+  </Step>
+</Steps>
+
+## MCP endpoint
+
+The MCP endpoint URL is the same for all projects:
+
+```
+https://app.surfdata.io/mcp/http
+```
+
+The Bearer token in the `Authorization` header determines which project and tools the agent can access.
+
+### Authentication
+
+All requests must include the Bearer token:
+
+```
+Authorization: Bearer sk_live_<your-token>
+```
+
+### Supported methods
+
+| Method | Description |
+|--------|-------------|
+| `initialize` | Handshake — returns server capabilities |
+| `tools/list` | Returns available tools and their schemas |
+| `tools/call` | Executes a tool with arguments |
+| `ping` | Health check |
+
+## Unpublishing
+
+You can unpublish a project at any time:
+
+1. Open the project settings
+2. Click **Unpublish**
+3. Confirm the action
+
+<Warning>
+  Unpublishing immediately deactivates all tokens for the project. Agents will no longer be able to access your tools. This action is reversible — you can republish later.
+</Warning>
+
+## Managing tokens
+
+After publishing, you can manage your tokens from the project settings:
+
+- **Generate new tokens** — create additional tokens for different agents or environments
+- **Activate/deactivate** — toggle tokens without deleting them
+- **Set expiration** — optionally set an expiration date
+- **Revoke** — permanently delete a token
+
+See [Token Management](/security/tokens) for detailed token management.
+
+## Connecting agents
+
+<Tabs>
+  <Tab title="Claude Desktop">
+    Add to `claude_desktop_config.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://app.surfdata.io/mcp/http",
+          "headers": {
+            "Authorization": "Bearer your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Claude Code">
+    Add to your project's `.mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://app.surfdata.io/mcp/http",
+          "headers": {
+            "Authorization": "Bearer your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Cursor">
+    Add to `.cursor/mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "surf-data": {
+          "url": "https://app.surfdata.io/mcp/http",
+          "headers": {
+            "Authorization": "Bearer your-token-here"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="HTTP (direct)">
+    Make JSON-RPC 2.0 requests directly:
+
+    ```bash
+    curl -X POST https://app.surfdata.io/mcp/http \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer your-token-here" \
+      -d '{
+        "jsonrpc": "2.0",
+        "method": "tools/list",
+        "id": 1
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+For detailed integration guides, see:
+- [Claude Integration](/integrations/claude)
+- [Cursor Integration](/integrations/cursor)
+- [Custom Agents](/integrations/custom-agents)

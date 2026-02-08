@@ -1,0 +1,259 @@
+---
+title: "Datasources API"
+description: "Manage database connections within projects"
+---
+
+## List datasources
+
+Returns all datasources for a project.
+
+```
+GET /api/projects/{projectId}/datasources
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+### Response
+
+```json
+{
+  "datasources": [
+    {
+      "id": "ds_abc123",
+      "name": "Production DB",
+      "type": "postgres",
+      "projectId": "clx1234567890",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-15T10:30:00Z",
+      "_count": {
+        "agentViews": 3,
+        "mcpTools": 5
+      }
+    }
+  ]
+}
+```
+
+<ResponseField name="datasources" type="object[]" required>
+  Array of datasource objects.
+  <Expandable>
+    <ResponseField name="id" type="string" required>Unique datasource identifier</ResponseField>
+    <ResponseField name="name" type="string" required>Datasource display name</ResponseField>
+    <ResponseField name="type" type="string" required>Database type: `postgres`, `mysql`, or `demo`</ResponseField>
+    <ResponseField name="projectId" type="string" required>Parent project ID</ResponseField>
+    <ResponseField name="createdAt" type="string" required>ISO 8601 creation timestamp</ResponseField>
+    <ResponseField name="_count" type="object">
+      Resource counts.
+      <Expandable>
+        <ResponseField name="agentViews" type="number">Number of linked views</ResponseField>
+        <ResponseField name="mcpTools" type="number">Number of linked tools</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Create datasource
+
+Creates a new database connection.
+
+```
+POST /api/projects/{projectId}/datasources
+```
+
+<ParamField path="projectId" type="string" required>
+  The project ID.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Display name for the datasource.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Database type. One of: `postgres`, `mysql`, `demo`.
+</ParamField>
+
+<ParamField body="config" type="object">
+  Connection configuration. Required for `postgres` and `mysql` types.
+  <Expandable>
+    <ParamField body="connectionString" type="string">Full connection URL. If provided, other fields are optional.</ParamField>
+    <ParamField body="host" type="string">Database server hostname.</ParamField>
+    <ParamField body="port" type="number">Database server port. Default: 5432 (PG) or 3306 (MySQL).</ParamField>
+    <ParamField body="database" type="string">Database name.</ParamField>
+    <ParamField body="username" type="string">Database username.</ParamField>
+    <ParamField body="password" type="string">Database password.</ParamField>
+    <ParamField body="ssl" type="boolean">Enable SSL (PostgreSQL only).</ParamField>
+    <ParamField body="sslMode" type="string">SSL mode (e.g., `require`, `verify-full`).</ParamField>
+  </Expandable>
+</ParamField>
+
+### Example
+
+```bash
+curl -X POST https://app.surfdata.io/api/projects/clx123/datasources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production PostgreSQL",
+    "type": "postgres",
+    "config": {
+      "host": "db.example.com",
+      "port": 5432,
+      "database": "myapp",
+      "username": "readonly_user",
+      "password": "secure_password",
+      "ssl": true
+    }
+  }'
+```
+
+### Process
+
+1. Validates the configuration fields
+2. Tests the database connection
+3. Encrypts the configuration
+4. Checks datasource limits for the organization
+5. Creates and returns the datasource
+
+### Errors
+
+| Status | Error | Cause |
+|--------|-------|-------|
+| `400` | Missing required fields | Name or type not provided |
+| `400` | Connection test failed | Cannot connect to the database |
+| `409` | Datasource limit reached | Organization has reached its plan's datasource limit |
+
+---
+
+## Test connection
+
+Tests a database connection without creating a datasource.
+
+```
+POST /api/projects/{projectId}/datasources/test-connection
+```
+
+<ParamField body="type" type="string" required>
+  Database type: `postgres` or `mysql`.
+</ParamField>
+
+<ParamField body="config" type="object" required>
+  Connection configuration (same as create).
+</ParamField>
+
+### Response
+
+```json
+{
+  "success": true,
+  "message": "Connected successfully",
+  "tableCount": 42
+}
+```
+
+---
+
+## Get datasource tables
+
+Returns the list of tables and columns in a datasource.
+
+```
+GET /api/projects/{projectId}/datasources/{datasourceId}/tables
+```
+
+<ParamField path="datasourceId" type="string" required>
+  The datasource ID.
+</ParamField>
+
+<ParamField query="table" type="string">
+  Filter to a specific table to get its columns.
+</ParamField>
+
+<ParamField query="schema" type="string">
+  Filter to a specific schema.
+</ParamField>
+
+### Response
+
+```json
+{
+  "tables": [
+    {
+      "name": "customers",
+      "schema": "public",
+      "type": "table"
+    }
+  ],
+  "columns": [
+    {
+      "name": "id",
+      "type": "varchar",
+      "nullable": false
+    },
+    {
+      "name": "email",
+      "type": "varchar",
+      "nullable": false
+    }
+  ]
+}
+```
+
+---
+
+## Execute query
+
+Executes a raw SQL query against a datasource.
+
+```
+POST /api/projects/{projectId}/datasources/{datasourceId}/query
+```
+
+<ParamField body="query" type="string" required>
+  The SQL query to execute.
+</ParamField>
+
+### Response
+
+```json
+{
+  "result": {
+    "columns": ["id", "name", "email"],
+    "rows": [
+      {"id": "1", "name": "João Silva", "email": "joao@example.com"}
+    ],
+    "rowCount": 1,
+    "executionTime": 45
+  }
+}
+```
+
+<Note>
+  This endpoint is for testing and exploration in the dashboard. For agent access, use the [MCP endpoint](/api-reference/mcp-endpoint).
+</Note>
+
+---
+
+## Update datasource
+
+Updates a datasource's name or configuration.
+
+```
+PUT /api/projects/{projectId}/datasources/{datasourceId}
+```
+
+---
+
+## Delete datasource
+
+Permanently deletes a datasource and all linked views and tools.
+
+```
+DELETE /api/projects/{projectId}/datasources/{datasourceId}
+```
+
+<Warning>
+  Deleting a datasource also deletes all Agent Views and MCP Tools linked to it.
+</Warning>
