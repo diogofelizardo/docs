@@ -66,6 +66,16 @@
                   "pt-br/integrations/cursor",
                   "pt-br/integrations/custom-agents"
                 ]
+              },
+              {
+                "group": "Exemplos",
+                "pages": [
+                  "pt-br/examples/customer-support-agent",
+                  "pt-br/examples/sales-analytics-agent",
+                  "pt-br/examples/ecommerce-inventory-agent",
+                  "pt-br/examples/hr-agent",
+                  "pt-br/examples/financial-agent"
+                ]
               }
             ]
           },
@@ -149,6 +159,16 @@
                   "en/integrations/claude",
                   "en/integrations/cursor",
                   "en/integrations/custom-agents"
+                ]
+              },
+              {
+                "group": "Examples",
+                "pages": [
+                  "en/examples/customer-support-agent",
+                  "en/examples/sales-analytics-agent",
+                  "en/examples/ecommerce-inventory-agent",
+                  "en/examples/hr-agent",
+                  "en/examples/financial-agent"
                 ]
               }
             ]
