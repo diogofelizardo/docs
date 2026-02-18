@@ -205,14 +205,14 @@ GET /api/projects/{projectId}/datasources/{datasourceId}/tables
 
 ## Execute query
 
-Executes a raw SQL query against a datasource.
+Executes a raw SQL query against a datasource. Results are limited to **1,000 rows**. Dangerous SQL statements (DROP, DELETE, INSERT, UPDATE, ALTER, etc.) are blocked.
 
 ```
 POST /api/projects/{projectId}/datasources/{datasourceId}/query
 ```
 
 <ParamField body="query" type="string" required>
-  The SQL query to execute.
+  The SQL query to execute. Must be a read-only query (SELECT/WITH).
 </ParamField>
 
 ### Response
@@ -225,10 +225,16 @@ POST /api/projects/{projectId}/datasources/{datasourceId}/query
       {"id": "1", "name": "João Silva", "email": "joao@example.com"}
     ],
     "rowCount": 1,
-    "executionTime": 45
+    "truncated": false,
+    "executionTime": 45,
+    "executedAt": "2024-01-20T14:30:00Z"
   }
 }
 ```
+
+<ResponseField name="result.truncated" type="boolean">Whether results were truncated to the 1,000-row limit</ResponseField>
+<ResponseField name="result.executionTime" type="number">Query execution time in milliseconds</ResponseField>
+<ResponseField name="result.executedAt" type="string">ISO 8601 timestamp of when the query was executed</ResponseField>
 
 <Note>
   This endpoint is for testing and exploration in the dashboard. For agent access, use the [MCP endpoint](/en/api-reference/mcp-endpoint).

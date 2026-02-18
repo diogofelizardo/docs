@@ -13,6 +13,10 @@ O endpoint MCP é a interface principal para agentes de IA interagirem com suas 
 POST https://surfdata.com.br/mcp/http
 ```
 
+<Note>
+  Um caminho de transporte alternativo `/mcp/mcp` também é suportado e é funcionalmente idêntico.
+</Note>
+
 ### Autenticação
 
 ```
@@ -224,19 +228,28 @@ Quando `tools/call` é invocado, o seguinte pipeline é executado:
     Encontra a tool solicitada pelo nome no projeto.
   </Step>
   <Step title="Substituição de parâmetros">
-    Substitui os placeholders `{parameter}` pelos valores dos argumentos fornecidos. Os valores são escapados para prevenir injeção SQL.
+    Substitui os placeholders `{parameter}` pelos valores dos argumentos fornecidos. Os valores são escapados com aspas simples para prevenir injeção SQL.
   </Step>
   <Step title="Verificação de segurança da query">
     Valida que a query não contém padrões SQL destrutivos (DROP, DELETE, UPDATE, INSERT, ALTER, TRUNCATE, CREATE, GRANT, REVOKE).
+  </Step>
+  <Step title="Encapsulamento via CTE">
+    Encapsula o SQL da Agent View como uma CTE, para que a query da tool possa referenciar a view pelo nome:
+    ```sql
+    WITH "viewName" AS (
+      -- SQL da Agent View
+    )
+    -- SQL da Tool referenciando viewName
+    ```
   </Step>
   <Step title="Adição de limite de linhas">
     Se a query não possui uma cláusula LIMIT, adiciona `LIMIT 100`.
   </Step>
   <Step title="Execução da query">
-    Conecta à datasource (descriptografando as credenciais) e executa a query com timeout.
+    Conecta à datasource (descriptografando as credenciais) e executa a query combinada CTE + tool.
   </Step>
-  <Step title="Aplicação de políticas">
-    Se as políticas de mascaramento estão habilitadas, aplica-as ao conjunto de resultados.
+  <Step title="Aplicação de mascaramento de PII">
+    Se o mascaramento está habilitado, aplica as regras de mascaramento de PII baseadas em JSON ao conjunto de resultados. Cada regra mapeia uma coluna para um tipo de mascaramento predefinido (ex.: `cpf`, `email`, `phone`, `name`).
   </Step>
   <Step title="Log de invocação">
     Registra os detalhes da execução (tool, parâmetros, duração, status, contagem de linhas).

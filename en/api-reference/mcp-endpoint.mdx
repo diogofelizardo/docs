@@ -13,6 +13,10 @@ The MCP endpoint is the primary interface for AI agents to interact with your pu
 POST https://surfdata.com.br/mcp/http
 ```
 
+<Note>
+  An alternative transport path `/mcp/mcp` is also supported and is functionally identical.
+</Note>
+
 ### Authentication
 
 ```
@@ -224,19 +228,28 @@ When `tools/call` is invoked, the following pipeline executes:
     Find the requested tool by name in the project.
   </Step>
   <Step title="Parameter substitution">
-    Replace `{parameter}` placeholders with provided argument values. Values are escaped to prevent SQL injection.
+    Replace `{parameter}` placeholders with provided argument values. Values are single-quote-escaped and wrapped in quotes to prevent SQL injection.
   </Step>
   <Step title="Query safety check">
     Validate the query doesn't contain destructive SQL patterns (DROP, DELETE, UPDATE, INSERT, ALTER, TRUNCATE, CREATE, GRANT, REVOKE).
+  </Step>
+  <Step title="CTE wrapping">
+    Wrap the Agent View's SQL as a CTE, so the tool query can reference the view by name:
+    ```sql
+    WITH "viewName" AS (
+      -- Agent View SQL
+    )
+    -- Tool SQL referencing viewName
+    ```
   </Step>
   <Step title="Add row limit">
     If the query doesn't already have a LIMIT clause, add `LIMIT 100`.
   </Step>
   <Step title="Execute query">
-    Connect to the datasource (decrypting credentials) and run the query with a timeout.
+    Connect to the datasource (decrypting credentials) and run the combined CTE + tool query.
   </Step>
-  <Step title="Apply policies">
-    If masking policies are enabled, apply them to the result set.
+  <Step title="Apply PII masking">
+    If masking is enabled, apply JSON-based PII masking rules to the result set. Each rule maps a column to a predefined masking type (e.g., `cpf`, `email`, `phone`, `name`).
   </Step>
   <Step title="Log invocation">
     Record the execution details (tool, parameters, duration, status, row count).

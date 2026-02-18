@@ -121,7 +121,14 @@ POST /api/projects/{projectId}/tools
 </ParamField>
 
 <ParamField body="policyCode" type="string">
-  JavaScript code for the masking policy.
+  JSON array of PII masking rules. Each rule maps a column to a masking type.
+  ```json
+  [
+    { "column": "email", "type": "email" },
+    { "column": "cpf", "type": "cpf" }
+  ]
+  ```
+  Available types: `cpf`, `cnpj`, `rg`, `email`, `phone`, `name`, `address`, `ip`, `credit_card`, `birth_date`, `salary`, `health_data`, `biometric`, `genetic`, `political_opinion`, `religious_belief`, `sexual_orientation`, `ethnic_origin`, `generic`.
 </ParamField>
 
 ### Example
@@ -174,7 +181,7 @@ All fields are optional — only provided fields are updated.
 <ParamField body="parameters" type="object[]">New parameter definitions</ParamField>
 <ParamField body="testValues" type="object[]">New test values</ParamField>
 <ParamField body="policyEnabled" type="boolean">Toggle data masking</ParamField>
-<ParamField body="policyCode" type="string">New masking policy code</ParamField>
+<ParamField body="policyCode" type="string">New JSON array of PII masking rules</ParamField>
 
 ---
 
@@ -211,11 +218,55 @@ POST /api/projects/{projectId}/tools/{toolId}/test
   "result": {
     "columns": ["id", "name", "email"],
     "rows": [
-      {"id": "12345", "name": "João Silva", "email": "joao@example.com"}
+      {"id": "12345", "name": "João Silva", "email": "j***@e*****.com"}
     ],
     "rowCount": 1,
-    "executionTime": 32
-  },
-  "substitutedQuery": "SELECT id, name, email FROM customers WHERE id = '12345'"
+    "truncated": false,
+    "executionTime": 32,
+    "executedAt": "2024-01-20T14:30:00Z",
+    "substitutedQuery": "SELECT id, name, email FROM active_customers WHERE id = '12345'",
+    "viewUsed": "active_customers",
+    "masked": true
+  }
 }
 ```
+
+<ResponseField name="result.substitutedQuery" type="string">The final SQL query after parameter substitution</ResponseField>
+<ResponseField name="result.viewUsed" type="string">Name of the Agent View used as CTE</ResponseField>
+<ResponseField name="result.masked" type="boolean">Whether PII masking was applied to the results</ResponseField>
+<ResponseField name="result.truncated" type="boolean">Whether results were truncated to the 100-row limit</ResponseField>
+
+---
+
+## Detect PII
+
+Auto-detects PII columns in a tool's query results and suggests masking rules.
+
+```
+POST /api/projects/{projectId}/tools/{toolId}/detect-pii
+```
+
+The endpoint runs the tool's query with `LIMIT 1` and analyzes column names against known PII patterns (Portuguese and English).
+
+### Response
+
+```json
+{
+  "rules": [
+    { "column": "email", "type": "email" },
+    { "column": "cpf", "type": "cpf" },
+    { "column": "nome_completo", "type": "name" },
+    { "column": "telefone", "type": "phone" }
+  ],
+  "columns": ["id", "email", "cpf", "nome_completo", "telefone", "created_at"]
+}
+```
+
+<ResponseField name="rules" type="object[]" required>
+  Suggested PII masking rules based on column name analysis.
+  <Expandable>
+    <ResponseField name="column" type="string" required>Column name that matched a PII pattern</ResponseField>
+    <ResponseField name="type" type="string" required>Suggested masking type (e.g., `cpf`, `email`, `phone`, `name`)</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="columns" type="string[]" required>All column names returned by the query</ResponseField>

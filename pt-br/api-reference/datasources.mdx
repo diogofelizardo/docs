@@ -205,14 +205,14 @@ GET /api/projects/{projectId}/datasources/{datasourceId}/tables
 
 ## Executar query
 
-Executa uma query SQL bruta em uma datasource.
+Executa uma query SQL bruta em uma datasource. Os resultados são limitados a **1.000 linhas**. Comandos SQL perigosos (DROP, DELETE, INSERT, UPDATE, ALTER, etc.) são bloqueados.
 
 ```
 POST /api/projects/{projectId}/datasources/{datasourceId}/query
 ```
 
 <ParamField body="query" type="string" required>
-  A query SQL a ser executada.
+  A query SQL a ser executada. Deve ser uma query somente leitura (SELECT/WITH).
 </ParamField>
 
 ### Resposta
@@ -225,10 +225,16 @@ POST /api/projects/{projectId}/datasources/{datasourceId}/query
       {"id": "1", "name": "João Silva", "email": "joao@example.com"}
     ],
     "rowCount": 1,
-    "executionTime": 45
+    "truncated": false,
+    "executionTime": 45,
+    "executedAt": "2024-01-20T14:30:00Z"
   }
 }
 ```
+
+<ResponseField name="result.truncated" type="boolean">Se os resultados foram truncados no limite de 1.000 linhas</ResponseField>
+<ResponseField name="result.executionTime" type="number">Tempo de execução da query em milissegundos</ResponseField>
+<ResponseField name="result.executedAt" type="string">Timestamp ISO 8601 de quando a query foi executada</ResponseField>
 
 <Note>
   Este endpoint é para testes e exploração no dashboard. Para acesso de agentes, use o [endpoint MCP](/pt-br/api-reference/mcp-endpoint).

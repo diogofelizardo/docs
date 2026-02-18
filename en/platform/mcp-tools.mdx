@@ -7,11 +7,51 @@ description: "Create parameterized SQL functions that AI agents can call"
 
 **MCP Tools** are the core building block of Surf Data. They define callable functions that AI agents can discover and execute via the Model Context Protocol. Each tool wraps a parameterized SQL query and exposes it as a structured function.
 
+Every tool **must** reference an [Agent View](/en/platform/agent-views) via a required `viewId`. When a tool executes, its SQL query runs within the context of the linked view using a CTE (Common Table Expression) wrapping pattern. This ensures that every tool query is scoped to the data defined by the view.
+
+## How CTE execution works
+
+When a tool is executed, Surf Data automatically wraps the view's SQL as a CTE and appends the tool's query. The resulting SQL that runs against your database follows this pattern:
+
+```sql
+WITH "viewName" AS (
+  <view's SQL query>
+)
+<tool's SQL query that references viewName>
+```
+
+**Example:** If your Agent View `active_customers` is defined as:
+
+```sql
+SELECT id, name, email, plan
+FROM customers
+WHERE active = true
+```
+
+And your tool's SQL query is:
+
+```sql
+SELECT * FROM active_customers WHERE id = {customer_id}
+```
+
+The final executed query becomes:
+
+```sql
+WITH "active_customers" AS (
+  SELECT id, name, email, plan
+  FROM customers
+  WHERE active = true
+)
+SELECT * FROM active_customers WHERE id = 123
+```
+
+This means your tool's SQL query should **reference the view name** as if it were a table, rather than querying underlying tables directly. The view acts as the data boundary for the tool.
+
 ## Creating a tool
 
 <Steps>
   <Step title="Select a view">
-    Every tool must be linked to an [Agent View](/en/platform/agent-views). Select or create a view first.
+    Every tool must be linked to an [Agent View](/en/platform/agent-views). The `viewId` is a **required** field. Select or create a view first.
   </Step>
   <Step title="Create a new tool">
     Click **New Tool** in the tools section of the left sidebar.
@@ -23,8 +63,8 @@ description: "Create parameterized SQL functions that AI agents can call"
     |-------|----------|-------------|
     | Name | Yes | Function name agents call (e.g., `get_customer_by_id`) |
     | Description | Yes | Human-readable explanation of what the tool does |
-    | SQL Query | Yes | Parameterized SQL template |
-    | View | Yes | Linked Agent View |
+    | SQL Query | Yes | Parameterized SQL that references the view name |
+    | View (`viewId`) | Yes | Linked Agent View — the tool's query executes within this view's CTE |
     | Datasource | No | Datasource override (defaults to view's datasource) |
   </Step>
   <Step title="Add parameters">
@@ -32,9 +72,13 @@ description: "Create parameterized SQL functions that AI agents can call"
 
     ```sql
     SELECT id, name, email, plan
-    FROM customers
+    FROM active_customers
     WHERE id = {customer_id}
     ```
+
+    <Note>
+      The query above references `active_customers`, which is the name of the linked Agent View. At execution time, this is resolved through the CTE wrapping.
+    </Note>
 
     Then add the parameter definition:
 
@@ -47,7 +91,7 @@ description: "Create parameterized SQL functions that AI agents can call"
   </Step>
   <Step title="Test the tool">
     Add test values for each parameter and click **Test Run**. The results panel shows:
-    - The substituted SQL query
+    - The substituted SQL query (including the CTE wrapping)
     - Returned rows
     - Execution time
     - Error messages (if any)
@@ -65,12 +109,12 @@ Surf Data uses `{parameter_name}` syntax for query parameterization. Parameters 
 
 **Single parameter:**
 ```sql
-SELECT * FROM customers WHERE id = {customer_id}
+SELECT * FROM active_customers WHERE id = {customer_id}
 ```
 
 **Multiple parameters:**
 ```sql
-SELECT * FROM orders
+SELECT * FROM customer_orders
 WHERE customer_id = {customer_id}
   AND status = {order_status}
   AND created_at >= {start_date}
@@ -78,9 +122,13 @@ WHERE customer_id = {customer_id}
 
 **LIKE patterns:**
 ```sql
-SELECT * FROM customers
+SELECT * FROM active_customers
 WHERE name LIKE '%' || {search_term} || '%'
 ```
+
+<Note>
+  In all examples above, `active_customers` and `customer_orders` are Agent View names, not raw database tables. The CTE wrapping resolves them at execution time.
+</Note>
 
 ### Supported parameter types
 
@@ -91,16 +139,38 @@ WHERE name LIKE '%' || {search_term} || '%'
 | `boolean` | True or false | `true` |
 | `date` | Date or datetime string | `"2024-01-15"` |
 
-## Security policies
+## PII masking rules
 
-Tools support optional **security policies** for data masking:
+Tools support optional **PII masking** to protect sensitive data in query results. Instead of writing custom code, you configure masking through JSON-based PII rules with predefined types.
 
-1. Toggle **Policy Enabled** on the tool configuration
-2. Write policy code that transforms the query results
-3. Common use cases:
-   - Mask email addresses (`john@example.com` → `j***@example.com`)
-   - Redact phone numbers
-   - Truncate sensitive fields
+### Configuring PII rules
+
+1. Toggle **Policy Enabled** (`policyEnabled`) on the tool configuration.
+2. Define your masking rules in the **Policy Code** (`policyCode`) field as a JSON array. Each rule specifies a column and a masking type:
+
+```json
+[
+  { "column": "email", "type": "email" },
+  { "column": "cpf", "type": "cpf" },
+  { "column": "phone", "type": "phone" }
+]
+```
+
+### Predefined masking types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `cpf` | Masks Brazilian CPF numbers | `123.456.789-00` → `***.***.789-00` |
+| `cnpj` | Masks Brazilian CNPJ numbers | `12.345.678/0001-00` → `**.***.678/0001-00` |
+| `email` | Masks email addresses | `john@example.com` → `j***@example.com` |
+| `phone` | Masks phone numbers | `+55 11 99999-1234` → `+55 11 *****-1234` |
+| `name` | Masks personal names | `John Silva` → `J*** S***` |
+
+### Auto-detect PII
+
+Surf Data provides a **detect-pii** endpoint that automatically analyzes your tool's result columns and suggests appropriate masking rules based on column names. For example, a column named `email` will be matched to the `email` masking type, and a column named `cpf` will be matched to the `cpf` type.
+
+This lets you quickly bootstrap PII rules without manually inspecting every column. After detection, review the suggested rules and adjust as needed before saving.
 
 See [Data Masking](/en/security/data-masking) for detailed policy configuration.
 
@@ -160,8 +230,16 @@ Additionally, all SELECT queries are automatically capped with `LIMIT 100` if no
     **Bad:** "Gets a customer"
   </Accordion>
 
+  <Accordion title="Reference view names in your SQL">
+    Since tools execute via CTE wrapping, always write your SQL queries referencing the linked view name rather than raw database tables. This keeps your data access scoped and consistent with the view's definition.
+  </Accordion>
+
   <Accordion title="Mark required parameters">
     Always mark essential parameters as required. Optional parameters should have sensible defaults in your SQL (e.g., using `COALESCE`).
+  </Accordion>
+
+  <Accordion title="Use auto-detect PII for new tools">
+    When creating a new tool, run the PII auto-detect feature to quickly identify columns that may contain sensitive data. Review and refine the suggested rules before enabling the policy.
   </Accordion>
 
   <Accordion title="Test before publishing">
@@ -169,5 +247,6 @@ Additionally, all SELECT queries are automatically capped with `LIMIT 100` if no
     - Correct results
     - Reasonable execution times
     - Proper error handling for edge cases
+    - PII masking applied correctly on sensitive columns
   </Accordion>
 </AccordionGroup>

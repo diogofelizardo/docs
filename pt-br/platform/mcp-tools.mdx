@@ -7,11 +7,51 @@ description: "Crie funções SQL parametrizadas que agentes de IA podem chamar"
 
 **MCP Tools** são o bloco de construção principal do Surf Data. Elas definem funções chamáveis que agentes de IA podem descobrir e executar via Model Context Protocol. Cada tool encapsula uma consulta SQL parametrizada e a expõe como uma função estruturada.
 
+Toda tool **deve** referenciar uma [Agent View](/pt-br/platform/agent-views) através de um `viewId` obrigatório. Quando uma tool é executada, sua consulta SQL roda dentro do contexto da view vinculada utilizando um padrão de encapsulamento CTE (Common Table Expression). Isso garante que toda consulta da tool esteja limitada aos dados definidos pela view.
+
+## Como funciona a execução via CTE
+
+Quando uma tool é executada, o Surf Data automaticamente encapsula o SQL da view como uma CTE e adiciona a consulta da tool em seguida. O SQL resultante que é executado no seu banco de dados segue este padrão:
+
+```sql
+WITH "viewName" AS (
+  <consulta SQL da view>
+)
+<consulta SQL da tool que referencia viewName>
+```
+
+**Exemplo:** Se sua Agent View `active_customers` é definida como:
+
+```sql
+SELECT id, name, email, plan
+FROM customers
+WHERE active = true
+```
+
+E a consulta SQL da sua tool é:
+
+```sql
+SELECT * FROM active_customers WHERE id = {customer_id}
+```
+
+A consulta final executada será:
+
+```sql
+WITH "active_customers" AS (
+  SELECT id, name, email, plan
+  FROM customers
+  WHERE active = true
+)
+SELECT * FROM active_customers WHERE id = 123
+```
+
+Isso significa que a consulta SQL da sua tool deve **referenciar o nome da view** como se fosse uma tabela, em vez de consultar as tabelas subjacentes diretamente. A view atua como a fronteira de dados para a tool.
+
 ## Criando uma tool
 
 <Steps>
   <Step title="Selecione uma view">
-    Toda tool deve estar vinculada a uma [Agent View](/pt-br/platform/agent-views). Selecione ou crie uma view primeiro.
+    Toda tool deve estar vinculada a uma [Agent View](/pt-br/platform/agent-views). O `viewId` é um campo **obrigatório**. Selecione ou crie uma view primeiro.
   </Step>
   <Step title="Crie uma nova tool">
     Clique em **New Tool** na seção de tools da barra lateral esquerda.
@@ -23,8 +63,8 @@ description: "Crie funções SQL parametrizadas que agentes de IA podem chamar"
     |-------|----------|-------------|
     | Name | Sim | Nome da função que os agentes chamam (ex: `get_customer_by_id`) |
     | Description | Sim | Explicação legível do que a tool faz |
-    | SQL Query | Sim | Template SQL parametrizado |
-    | View | Sim | Agent View vinculada |
+    | SQL Query | Sim | SQL parametrizado que referencia o nome da view |
+    | View (`viewId`) | Sim | Agent View vinculada — a consulta da tool executa dentro da CTE desta view |
     | Datasource | Não | Override de datasource (padrão é a datasource da view) |
   </Step>
   <Step title="Adicione parâmetros">
@@ -32,9 +72,13 @@ description: "Crie funções SQL parametrizadas que agentes de IA podem chamar"
 
     ```sql
     SELECT id, name, email, plan
-    FROM customers
+    FROM active_customers
     WHERE id = {customer_id}
     ```
+
+    <Note>
+      A consulta acima referencia `active_customers`, que é o nome da Agent View vinculada. No momento da execução, isso é resolvido através do encapsulamento CTE.
+    </Note>
 
     Em seguida, adicione a definição do parâmetro:
 
@@ -47,7 +91,7 @@ description: "Crie funções SQL parametrizadas que agentes de IA podem chamar"
   </Step>
   <Step title="Teste a tool">
     Adicione valores de teste para cada parâmetro e clique em **Test Run**. O painel de resultados mostra:
-    - A consulta SQL substituída
+    - A consulta SQL substituída (incluindo o encapsulamento CTE)
     - Linhas retornadas
     - Tempo de execução
     - Mensagens de erro (se houver)
@@ -65,12 +109,12 @@ O Surf Data usa a sintaxe `{parameter_name}` para parametrização de consultas.
 
 **Parâmetro único:**
 ```sql
-SELECT * FROM customers WHERE id = {customer_id}
+SELECT * FROM active_customers WHERE id = {customer_id}
 ```
 
 **Múltiplos parâmetros:**
 ```sql
-SELECT * FROM orders
+SELECT * FROM customer_orders
 WHERE customer_id = {customer_id}
   AND status = {order_status}
   AND created_at >= {start_date}
@@ -78,9 +122,13 @@ WHERE customer_id = {customer_id}
 
 **Padrões LIKE:**
 ```sql
-SELECT * FROM customers
+SELECT * FROM active_customers
 WHERE name LIKE '%' || {search_term} || '%'
 ```
+
+<Note>
+  Em todos os exemplos acima, `active_customers` e `customer_orders` são nomes de Agent Views, não tabelas brutas do banco de dados. O encapsulamento CTE os resolve no momento da execução.
+</Note>
 
 ### Tipos de parâmetros suportados
 
@@ -91,16 +139,38 @@ WHERE name LIKE '%' || {search_term} || '%'
 | `boolean` | Verdadeiro ou falso | `true` |
 | `date` | String de data ou datetime | `"2024-01-15"` |
 
-## Políticas de segurança
+## Regras de mascaramento de PII
 
-Tools suportam **políticas de segurança** opcionais para mascaramento de dados:
+Tools suportam **mascaramento de PII** opcional para proteger dados sensíveis nos resultados de consultas. Em vez de escrever código personalizado, você configura o mascaramento através de regras PII baseadas em JSON com tipos predefinidos.
 
-1. Ative **Policy Enabled** na configuração da tool
-2. Escreva o código da política que transforma os resultados da consulta
-3. Casos de uso comuns:
-   - Mascarar endereços de email (`john@example.com` -> `j***@example.com`)
-   - Ocultar números de telefone
-   - Truncar campos sensíveis
+### Configurando regras de PII
+
+1. Ative **Policy Enabled** (`policyEnabled`) na configuração da tool.
+2. Defina suas regras de mascaramento no campo **Policy Code** (`policyCode`) como um array JSON. Cada regra especifica uma coluna e um tipo de mascaramento:
+
+```json
+[
+  { "column": "email", "type": "email" },
+  { "column": "cpf", "type": "cpf" },
+  { "column": "phone", "type": "phone" }
+]
+```
+
+### Tipos de mascaramento predefinidos
+
+| Tipo | Descrição | Exemplo |
+|------|-------------|---------|
+| `cpf` | Mascara números de CPF | `123.456.789-00` → `***.***.789-00` |
+| `cnpj` | Mascara números de CNPJ | `12.345.678/0001-00` → `**.***.678/0001-00` |
+| `email` | Mascara endereços de email | `john@example.com` → `j***@example.com` |
+| `phone` | Mascara números de telefone | `+55 11 99999-1234` → `+55 11 *****-1234` |
+| `name` | Mascara nomes pessoais | `John Silva` → `J*** S***` |
+
+### Detecção automática de PII
+
+O Surf Data oferece um endpoint **detect-pii** que analisa automaticamente as colunas de resultado da sua tool e sugere regras de mascaramento apropriadas com base nos nomes das colunas. Por exemplo, uma coluna chamada `email` será associada ao tipo de mascaramento `email`, e uma coluna chamada `cpf` será associada ao tipo `cpf`.
+
+Isso permite que você configure rapidamente regras de PII sem precisar inspecionar manualmente cada coluna. Após a detecção, revise as regras sugeridas e ajuste conforme necessário antes de salvar.
 
 Consulte [Mascaramento de Dados](/pt-br/security/data-masking) para configuração detalhada de políticas.
 
@@ -160,8 +230,16 @@ Além disso, todas as consultas SELECT recebem automaticamente um `LIMIT 100` ca
     **Ruim:** "Busca um cliente"
   </Accordion>
 
+  <Accordion title="Referencie nomes de views no seu SQL">
+    Como as tools executam via encapsulamento CTE, sempre escreva suas consultas SQL referenciando o nome da view vinculada em vez de tabelas brutas do banco de dados. Isso mantém o acesso aos dados delimitado e consistente com a definição da view.
+  </Accordion>
+
   <Accordion title="Marque parâmetros obrigatórios">
     Sempre marque parâmetros essenciais como obrigatórios. Parâmetros opcionais devem ter valores padrão sensíveis no seu SQL (ex: usando `COALESCE`).
+  </Accordion>
+
+  <Accordion title="Use a detecção automática de PII para novas tools">
+    Ao criar uma nova tool, execute o recurso de detecção automática de PII para identificar rapidamente colunas que podem conter dados sensíveis. Revise e refine as regras sugeridas antes de ativar a política.
   </Accordion>
 
   <Accordion title="Teste antes de publicar">
@@ -169,5 +247,6 @@ Além disso, todas as consultas SELECT recebem automaticamente um `LIMIT 100` ca
     - Resultados corretos
     - Tempos de execução razoáveis
     - Tratamento adequado de erros para casos extremos
+    - Mascaramento de PII aplicado corretamente nas colunas sensíveis
   </Accordion>
 </AccordionGroup>

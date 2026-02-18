@@ -121,7 +121,14 @@ POST /api/projects/{projectId}/tools
 </ParamField>
 
 <ParamField body="policyCode" type="string">
-  Código JavaScript para a política de mascaramento.
+  Array JSON de regras de mascaramento de PII. Cada regra mapeia uma coluna para um tipo de mascaramento.
+  ```json
+  [
+    { "column": "email", "type": "email" },
+    { "column": "cpf", "type": "cpf" }
+  ]
+  ```
+  Tipos disponíveis: `cpf`, `cnpj`, `rg`, `email`, `phone`, `name`, `address`, `ip`, `credit_card`, `birth_date`, `salary`, `health_data`, `biometric`, `genetic`, `political_opinion`, `religious_belief`, `sexual_orientation`, `ethnic_origin`, `generic`.
 </ParamField>
 
 ### Exemplo
@@ -174,7 +181,7 @@ Todos os campos são opcionais — apenas os campos fornecidos são atualizados.
 <ParamField body="parameters" type="object[]">Novas definições de parâmetros</ParamField>
 <ParamField body="testValues" type="object[]">Novos valores de teste</ParamField>
 <ParamField body="policyEnabled" type="boolean">Alternar mascaramento de dados</ParamField>
-<ParamField body="policyCode" type="string">Novo código de política de mascaramento</ParamField>
+<ParamField body="policyCode" type="string">Novo array JSON de regras de mascaramento de PII</ParamField>
 
 ---
 
@@ -211,11 +218,55 @@ POST /api/projects/{projectId}/tools/{toolId}/test
   "result": {
     "columns": ["id", "name", "email"],
     "rows": [
-      {"id": "12345", "name": "João Silva", "email": "joao@example.com"}
+      {"id": "12345", "name": "João Silva", "email": "j***@e*****.com"}
     ],
     "rowCount": 1,
-    "executionTime": 32
-  },
-  "substitutedQuery": "SELECT id, name, email FROM customers WHERE id = '12345'"
+    "truncated": false,
+    "executionTime": 32,
+    "executedAt": "2024-01-20T14:30:00Z",
+    "substitutedQuery": "SELECT id, name, email FROM active_customers WHERE id = '12345'",
+    "viewUsed": "active_customers",
+    "masked": true
+  }
 }
 ```
+
+<ResponseField name="result.substitutedQuery" type="string">A query SQL final após substituição de parâmetros</ResponseField>
+<ResponseField name="result.viewUsed" type="string">Nome da Agent View usada como CTE</ResponseField>
+<ResponseField name="result.masked" type="boolean">Se o mascaramento de PII foi aplicado nos resultados</ResponseField>
+<ResponseField name="result.truncated" type="boolean">Se os resultados foram truncados no limite de 100 linhas</ResponseField>
+
+---
+
+## Detectar PII
+
+Detecta automaticamente colunas de PII nos resultados de uma tool e sugere regras de mascaramento.
+
+```
+POST /api/projects/{projectId}/tools/{toolId}/detect-pii
+```
+
+O endpoint executa a query da tool com `LIMIT 1` e analisa os nomes das colunas contra padrões de PII conhecidos (português e inglês).
+
+### Resposta
+
+```json
+{
+  "rules": [
+    { "column": "email", "type": "email" },
+    { "column": "cpf", "type": "cpf" },
+    { "column": "nome_completo", "type": "name" },
+    { "column": "telefone", "type": "phone" }
+  ],
+  "columns": ["id", "email", "cpf", "nome_completo", "telefone", "created_at"]
+}
+```
+
+<ResponseField name="rules" type="object[]" required>
+  Regras de mascaramento de PII sugeridas com base na análise dos nomes das colunas.
+  <Expandable>
+    <ResponseField name="column" type="string" required>Nome da coluna que correspondeu a um padrão de PII</ResponseField>
+    <ResponseField name="type" type="string" required>Tipo de mascaramento sugerido (ex.: `cpf`, `email`, `phone`, `name`)</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="columns" type="string[]" required>Todos os nomes de colunas retornados pela query</ResponseField>
